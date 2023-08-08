@@ -121,7 +121,21 @@ val Greeting: State = state(Parent) {
                 reentry();
             }else{
                 furhat.ask({ random{
-                    +"Could you please repeat the name and email id again??"
+                    +"Could you please repeat your last query?"
+                }});
+            }
+        }
+        else if(it.intent.getString("staffname")!=null && it.intent.getString("staffrole")!=null) {
+            val confirmation = furhat.askYN("Is it about professor "+it.intent.getString("staffname")+ " role in the department ?");
+            if(confirmation){
+                println("Reached with name and role here")
+                call(StaffInformation(it.intent.getString("staffname"),null,it.intent.getString("staffrole")));
+                println("Reached again here after info")
+                moreInfoFlag = true;
+                reentry();
+            }else{
+                furhat.ask({ random{
+                    +"Could you please repeat the last query?"
                 }});
             }
         }
@@ -142,8 +156,13 @@ val Greeting: State = state(Parent) {
 
 
     onResponse<No> {
-        furhat.say("Ok.")
-    }
+        furhat.say {
+            +Gestures.BigSmile()
+            +"Hope I could help you with some information today"
+            +Gestures.BigSmile()
+            +"Good Bye and Have a great day !!!"
+            +Gestures.BigSmile()
+    }}
 
 }
 

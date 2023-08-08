@@ -17,11 +17,13 @@ fun connectToMongoDB(): MongoDatabase {
     val mongoClient: MongoClient = MongoClients.create(connectionString)
     return mongoClient.getDatabase("FurhatReceptionist")
 }
-fun queryCollection(database: MongoDatabase,profName: String,profemail: Boolean?=false): String {
+fun queryCollection(database: MongoDatabase,profName: String,profemail: Boolean?=false,profrole: Boolean?=false): String {
     val collection: MongoCollection<Document> = database.getCollection("staffInformation")
     println("Reached queryCOlleciton "+profName.capitalize())
+    val words = profName.split(" ").map { it.capitalize() }.joinToString(" ")
 
-    val filter = Document("name", profName.capitalize())
+    println("Reached queryCOlleciton after capitalize "+words)
+    val filter = Document("name", words)
     val result = collection.find(filter).toList();
     println("Reached queryCOlleciton Result "+result)
     // Process the query results
@@ -34,18 +36,21 @@ fun queryCollection(database: MongoDatabase,profName: String,profemail: Boolean?
         if(profemail==true){
             data =document["email"].toString()
         }
+        if(profrole==true){
+            data =document["role"].toString()
+        }
         println(data)
         data
     } else {
         // Value not found in the database
-        println("User not found")
+        println("Data not found")
         "Sorry I was not able to find the information that you requested for at the moment ! Could you please try later"
     }
 
 }
 
 
-fun StaffInformation(profName : String,profemail:String?=null)  = state(Parent) {
+fun StaffInformation(profName : String,profemail:String?=null,profRole:String?=null)  = state(Parent) {
     onEntry {
 
         val database = connectToMongoDB()
@@ -56,6 +61,10 @@ fun StaffInformation(profName : String,profemail:String?=null)  = state(Parent) 
         furhat.gesture(Gestures.Thoughtful(duration = 10.0))
         data = queryCollection(database,profName,true)
         furhat.stopGestures();
+    } else if(profName!=null && profRole!=null){
+        furhat.gesture(Gestures.Thoughtful(duration = 10.0))
+        data = queryCollection(database,profName,false,true)
+        furhat.stopGestures();
     }
         else{
         furhat.gesture(Gestures.Thoughtful(duration = 10.0))
@@ -65,11 +74,12 @@ fun StaffInformation(profName : String,profemail:String?=null)  = state(Parent) 
 
         if(infoFlag) {
             if(profemail!=null){
-                furhat.say({
+                furhat.say {
                     +"Here is the email address of professor "
-                    + profName
-                    + delay(1000)
-                    + data })
+                    +profName
+                    +delay(1000)
+                    +data
+                }
                 furhat.say {  random{
                     +"Let me spell the email address for you."
                     +"I will spell the email for you."
@@ -87,7 +97,15 @@ fun StaffInformation(profName : String,profemail:String?=null)  = state(Parent) 
                     println("email letter "+letter)
                     furhat.say(letter.toString())
                 }
-            }else {
+            }
+            else if(profRole!=null){
+                furhat.say{
+                +profName
+                +" is the"
+                +data
+                }
+            }
+            else {
                 furhat.say(data)
             }
             infoFlag=false;

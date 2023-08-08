@@ -5,6 +5,7 @@ import kotlin.sequences.Sequence
 
 class ProfessorNames : ListEntity<Names>()
 class MailEntity : ListEntity<Mail>()
+class RoleEntity :ListEntity<Role>()
 class Names : EnumEntity(speechRecPhrases = true) {
 
     override fun getEnum(lang: Language): List<String> {
@@ -50,6 +51,14 @@ class Mail : EnumEntity(speechRecPhrases = true) {
 
     override fun getEnum(lang: Language): List<String> {
         return listOf("Email","Electronic Mail","Mail")
+    }
+
+}
+
+class Role : EnumEntity(speechRecPhrases = true) {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf("Position","Role","Title","Job","Duty","Post")
     }
 
 }
