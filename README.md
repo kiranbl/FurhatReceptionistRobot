@@ -1,9 +1,8 @@
 # Skill
-Template skill
+Furhat Receptionist skill
 
 ## Description
-This is a skill template, see [the docs](https://docs.furhat.io/skills/#the-contents-of-a-skill) for a breakdown of the content. 
-For more example skills go to [our Github](https://github.com/FurhatRobotics/)
+This is a receptionist skill for the computer science department which is being developed....
 
 ## Usage
 Max number of users is set to: 2
