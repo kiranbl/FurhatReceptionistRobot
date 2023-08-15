@@ -6,10 +6,27 @@ import kotlin.sequences.Sequence
 class ProfessorNames : ListEntity<Names>()
 class MailEntity : ListEntity<Mail>()
 class RoleEntity :ListEntity<Role>()
+class ProgrammeNames :ListEntity<Programme>()
+class SemesterNames: ListEntity<Semester>()
+class ModuleSynonyms: ListEntity<Modules>()
+class CompulsorySynonyms: ListEntity<Compulsory>()
+class RepeatEntity: ListEntity<Repeat>()
+
+class Repeat: EnumEntity(speechRecPhrases = true) {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf("repeat", "reiterate", "recap", "once more", "once again", "one more", "go over")
+
+
+    }
+}
+
+//class ModuleNames :ListEntity<Module>()
 class Names : EnumEntity(speechRecPhrases = true) {
 
     override fun getEnum(lang: Language): List<String> {
-        return listOf("Test","Kiran",
+        return listOf(
+            "Test","Kiran",
             "Roger K Moore",
             "Guy Brown",
             "Temitope Adeosun",
@@ -58,7 +75,86 @@ class Mail : EnumEntity(speechRecPhrases = true) {
 class Role : EnumEntity(speechRecPhrases = true) {
 
     override fun getEnum(lang: Language): List<String> {
-        return listOf("Position","Role","Title","Job","Duty","Post")
+        return listOf("Position", "Role", "Title", "Job", "Duty", "Post")
+    }
+}
+class Programme : EnumEntity(speechRecPhrases = true) {
+    override fun getEnum(lang: Language): List<String> {
+        return listOf("Advanced Computer Science",
+            "Computer Science with Speech and Language Processing",
+            "Data Analytics",
+            "Cybersecurity and Artificial Intelligence")
+    }
+
+
+}
+
+
+class Semester : EnumEntity(speechRecPhrases = true) {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf("this","current","upcoming","next","last","previous","autumn","spring","summer","first","second","third")
     }
 
 }
+
+class Modules : EnumEntity(speechRecPhrases = true) {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf("module","modules","subject","subjects","course","courses","topics")
+    }
+
+}
+
+
+
+class Compulsory : EnumEntity(speechRecPhrases = true) {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf(
+            "Must pass",
+            "Compulsory",
+            "Mandatory",
+            "Required",
+            "Obligatory",
+            "Necessary",
+            "Essential")
+    }
+
+}
+
+//class Module: EnumEntity(speechRecPhrases = true) {
+//
+//    override fun getEnum(lang: Language): List<String> {
+//        return listOf(
+//            "Object Oriented Programming and Software Design",
+//            "Professional Issues",
+//            "Team Software Project",
+//            "Data Science with Python",
+//            "Text Processing",
+//            "Speech Processing",
+//            "3D Computer Graphics",
+//            "Testing and Verification in Safety-Critical Systems",
+//            "Machine Learning and Adaptive Intelligence",
+//            "Software development for mobile devices",
+//            "Modelling and Simulation of Natural Systems",
+//            "Theory of Distributed Systems",
+//            "Computer Security and Forensics",
+//            "The Intelligent Web",
+//            "Software and Hardware Verification",
+//            "Speech Technology",
+//            "Natural Language Processing",
+//            "Network Performance Analysis",
+//            "Parallel Computing with Graphical Processing Units",
+//            "Software Reengineering",
+//            "Scalable Machine Learning",
+//            "Team Project",
+//            "Fundamental Security Properties and Mechanisms",
+//            "Cyber Threat Hunting and Digital Forensics",
+//            "Development of Secure Software",
+//            "Security of Control and Embedded Systems"
+//
+//        )
+//    }
+//
+//}
