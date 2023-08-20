@@ -1,19 +1,16 @@
 package furhatos.app.furhatreceptionist.flow.main
 
 
-import Modules
 import furhatos.app.furhatreceptionist.flow.Parent
 import furhatos.flow.kotlin.*
 
-import com.mongodb.client.MongoClients
-import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import furhatos.gestures.Gestures
 import org.bson.Document
 import java.util.regex.Pattern
-import javax.print.Doc
 import java.time.*
+import javax.print.Doc
 
 var infoFlag = false;
 var autumnsemstart = Month.SEPTEMBER;
@@ -100,6 +97,44 @@ fun queryModuleCollection(database: MongoDatabase,progName: String): List<Docume
 
     println(sourceDocumentsList)
     return  sourceDocumentsList;
+}
+
+fun queryRoomCollection(database: MongoDatabase,profName: String?=null,roomName: String?=null): List<Document> {
+    val collection: MongoCollection<Document> = database.getCollection("roomInformation")
+    var regexPattern: Pattern? = null
+    if (profName != null) {
+        println("Reached queryCOlleciton " + profName.capitalize())
+    }
+    var words: String? = null
+    if (profName != null) {
+        regexPattern = Pattern.compile(profName, Pattern.CASE_INSENSITIVE)
+
+    } else if (roomName != null) {
+        //words = roomName?.split(" ")?.map { it.capitalize() }?.joinToString(" ")
+        regexPattern = Pattern.compile(roomName, Pattern.CASE_INSENSITIVE)
+
+    }
+    println("Reached queryCOlleciton after capitalize " + words)
+    val filter = Document("name", regexPattern)
+    val result = collection.find(filter);
+    println("Reached queryCOlleciton Result " + result)
+    // Process the query results
+    val iterator = result.iterator()
+    if (iterator.hasNext()) {
+        infoFlag = true;
+    }
+    var sourceRoomList = ArrayList<Document>()
+    for (document in result) {
+        println(document)
+        var doc = Document()
+        doc["roomnumber"] = document["roomnumber"]
+        doc["floor"] = document["floornumber"]
+
+        sourceRoomList.add(doc)
+    }
+
+    return sourceRoomList
+
 }
 
 fun StaffInformation(database:MongoDatabase,profName : String,profemail:String?=null,profRole:String?=null,repeatFlag:Boolean=false)  = state(Parent) {
@@ -318,6 +353,174 @@ fun ModuleInformation(database:MongoDatabase,
 }
 
 
+fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=null, repeatFlag:Boolean=false)  = state(Parent) {
+    onEntry {
+
+        //val database = connectToMongoDB()
+
+        println("Database "+database)
+        if(!repeatFlag) {
+            furhat.say {
+                +Gestures.GazeAway
+                random {
+                    +"Hmm"
+                    +"Let's see"
+                    +"Let me think"
+                    +"Wait a second"
+                }
+            }
+        }
+        var data:List<Document>?=null
+        // Query the collection and process results
+        if(profName!=null ){
+
+             data = queryRoomCollection(database,profName)
+            furhat.stopGestures();
+        }
+        else if(roomName!=null){
+             data = queryRoomCollection(database,null, roomName)
+            furhat.stopGestures();
+        }
+//        else if(profName!=null && profRole!=null){
+//                data = queryStaffCollection(database,profName,false,true)
+//                furhat.stopGestures();
+//            }
+//            else{
+//
+//                data = queryStaffCollection(database,profName)
+//            furhat.stopGestures();
+//        }
+        println(data)
+        var norooms = data?.size
+        if(infoFlag) {
+                println(data)
+            if (data != null) {
+                if(data.size>1){
+                    if(roomName!=null){
+                    furhat.say("There are $norooms $roomName in the department. ")
+                        furhat.say {random{
+                            +"You can find the $roomName in room numbers"
+                            +"The $roomName is located in room numbers "
+                            +"If you're looking for the $roomName, it is in room numbers"
+                            +"To reach the $roomName, go to room numbers"
+                            +"The $roomName is assigned as "
+                            +"$roomName can be located in room numbers"
+                        }
+                        }
+                    for(doc in data) {
+
+                        var roomnum = doc["roomnumber"].toString()
+
+                        furhat.say(roomnum)
+                    }
+                        var floornum:String? =null;
+                        furhat.say{random{
+                            +"The rooms are on the "
+                            +"You'll find the room on the "
+                            +"It's situated on the "
+                            +"The room can be found on the "
+                            +"The room's location is on the "
+                        }}
+                        for(doc in data) {
+                            var newfloornum= doc["floor"].toString()
+                            when (newfloornum) {
+                                "1" -> newfloornum = "first"
+                                "2" -> newfloornum = "second"
+                                "3" -> newfloornum = "third"
+                                "0" -> newfloornum = "ground"
+                            }
+                            if(floornum!=newfloornum){
+                                floornum=newfloornum
+                                furhat.say(newfloornum)
+                                continue
+                            }
+
+                        }
+                        furhat.say(" floor.")
+
+                    }
+                }
+            else {
+
+                    var floornum = data[0]["floor"]
+                    var roomnum = data[0]["roomnumber"]
+                    when (floornum) {
+                        "1" -> floornum = "first"
+                        "2" -> floornum = "second"
+                        "3" -> floornum = "third"
+                        "0" -> floornum = "ground"
+                    }
+                    if (profName != null) {
+
+                        furhat.say {
+                            random {
+                                +"You can find the professor $profName in room number $roomnum."
+                                +"The $profName's office is located in room number $roomnum."
+                                +"If you're looking for the $profName, their office is in room number $roomnum."
+                                +"Room number $roomnum is where you'll find the $profName's office."
+                                +"To meet with the $profName, go to room number $roomnum."
+                                +"The $profName's room is assigned as number $roomnum."
+                                +"If you need to speak to the $profName, they're in room number $roomnum."
+                                +"Professor $profName can be located in room number $roomnum."
+                            }
+                        }
+                        furhat.say {
+                            random {
+                                +"The room is on the $floornum floor."
+                                +"You'll find the room on the $floornum level."
+                                +"It's situated on the $floornum story."
+                                +"The room can be found on the $floornum floor."
+                                +"You need to go to the $floornum floor to reach the room."
+                                +"If you head to the $floornum floor, you'll find the room."
+                                +"The room's location is on the $floornum floor."
+                            }
+                        }
+//                if(floornum=="second"){
+//
+//                }else if(floornum == "first" || floornum == "third"){
+//
+//                }
+//                else{
+//
+//                }
+
+                    } else if (roomName != null) {
+
+                        furhat.say {
+                            random {
+                                +"You can find the $roomName in room number $roomnum."
+                                +"The $roomName is located in room number $roomnum."
+                                +"If you're looking for the $roomName, it is in room number $roomnum."
+                                +"Room number $roomnum is where you'll find the $roomName."
+                                +"To reach the $roomName, go to room number $roomnum."
+                                +"The $roomName room is assigned as number $roomnum."
+                                +"$roomName can be located in room number $roomnum."
+                            }
+                        }
+                        furhat.say {
+                            random {
+                                +"The room is on the $floornum floor."
+                                +"You'll find the room on the $floornum level."
+                                +"It's situated on the $floornum story."
+                                +"The room can be found on the $floornum floor."
+                                +"You need to go to the $floornum floor to reach the room."
+                                +"If you head up to the $floornum floor, you'll find the room."
+                                +"The room's location is on the $floornum floor."
+                            }
+                        }
+                    }
+                }
+            infoFlag=false;
+            }
+        }
+        else{
+            Gestures.ExpressSad();
+            furhat.say("Sorry I was not able to find the information that you requested for at the moment ! Could you please try later")
+            delay(1000)
+        }
+        terminate()
+    }
+}
 
 //    fun RepeatInformation()  = state(Parent) {
 //    onEntry {

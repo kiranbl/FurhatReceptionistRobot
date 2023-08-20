@@ -5,7 +5,8 @@ import com.mongodb.client.MongoDatabase
 import furhatos.app.furhatreceptionist.flow.Parent
 import furhatos.app.furhatreceptionist.nlu.StaffInformationIntent
 import furhatos.app.furhatreceptionist.nlu.ModuleInformationIntent
-import furhatos.app.furhatreceptionist.nlu.RepeatInformationIntent
+import furhatos.app.furhatreceptionist.nlu.RoomInformationIntent
+//import furhatos.app.furhatreceptionist.nlu.RoomInformationIntent
 import furhatos.flow.kotlin.*
 import furhatos.gestures.Gestures
 import furhatos.nlu.common.No
@@ -23,6 +24,10 @@ var repeatsemester:String?=null
 var repeatmodules:Boolean=false
 var repeatcompulsory:Boolean=false
 //var repeatmodulename:String?=null
+
+var repeatprofnameRoom :String?=null
+var repeatprofroom: Boolean=false
+var repeatroomname:String?=null
 
 var moduleIntentFlag:Boolean=false
 var staffIntentFlag:Boolean=false
@@ -157,7 +162,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             call(ModuleInformation(database, repeatprogrammeName!!, repeatsemester, repeatmodules,repeatcompulsory,true))
         }
         else if(staffRoomIntentFlag){
-
+            call(RoomInformation(database, repeatprofnameRoom, repeatroomname,true))
         }
             moreInfoFlag = true;
             reentry();
@@ -176,7 +181,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             repeatprofName = it.intent.getString("staffname")
             repeatprofemail = it.intent.getString("staffemail")
             repeatprofRole=null
-            val confirmation = furhat.askYN("Is it about professor "+it.intent.getString("staffname")+ " email address ?");
+            val confirmation = furhat.askYN(it.intent.toString());
             if(confirmation){
                 println("Reached with name and email here")
                 call(StaffInformation(database,it.intent.getString("staffname"),it.intent.getString("staffemail")));
@@ -193,7 +198,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             repeatprofName = it.intent.getString("staffname")
             repeatprofRole = it.intent.getString("staffrole")
             repeatprofemail=null
-            val confirmation = furhat.askYN("Is it about professor "+it.intent.getString("staffname")+ " role in the department ?");
+            val confirmation = furhat.askYN(it.intent.toString());
             if(confirmation){
                 println("Reached with name and role here")
                 call(StaffInformation(database,it.intent.getString("staffname"),null,it.intent.getString("staffrole")));
@@ -210,7 +215,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             repeatprofName = it.intent.getString("staffname")
             repeatprofRole = null
             repeatprofemail=null
-            val confirmation = furhat.askYN("Is it about professor "+it.intent.getString("staffname"));
+            val confirmation = furhat.askYN(it.intent.toString());
             if(confirmation){
                 call(StaffInformation(database,it.intent.getString("staffname")));
                 println("Reached again here after info")
@@ -272,7 +277,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
            repeatmodules = false
            repeatsemester =  null
            repeatcompulsory = false
-           val confirmation = furhat.askYN("Is it about modules in "+it.intent.getString("programmename")+ " programme ?");
+           val confirmation = furhat.askYN(it.intent.toString());
             if(confirmation){
                 println("Reached with programme name here")
                 call(ModuleInformation(database,it.intent.getString("programmename")));
@@ -309,8 +314,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             }
             else{
                 repeatprogrammeName = it.intent.getString("programmename")
-                val confirmation = furhat.askYN("Is it about "+ it.intent.getString("modules") + " in "+
-                        it.intent.getString("programmename") + " programme for "+it.intent.getString("semester")+ " semester ?");
+                val confirmation = furhat.askYN(it.intent.toString());
                 if(confirmation){
                     println("Reached with programme and semester here")
                     call(ModuleInformation(database, it.intent.getString("programmename"), it.intent.getString("semester"),true));
@@ -325,38 +329,124 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             }
 
         }
-        else if(it.intent.getString("programmename")!=null && it.intent.getString("compulsory") !=null){
-           repeatprogrammeName = it.intent.getString("programmename")
+        else if((it.intent.getString("programmename")!=null && it.intent.getString("compulsory") !=null) ||
+           (it.intent.getString("programmename")==null && it.intent.getString("compulsory") !=null)  ){
+
            repeatmodules = true
            repeatcompulsory = true
            repeatsemester = null
 
-           val confirmation = furhat.askYN("Is it about "+ it.intent.getString("compulsory")+" modules in "+it.intent.getString("programmename")+ " programme ?");
-            if(confirmation){
-                println("Reached with programme name here")
-                call(ModuleInformation(database,it.intent.getString("programmename"), null,true,true));
+           if(it.intent.getString("programmename")==null){
+               repeatprogrammeName = currentprogrammename
+               val confirmation = furhat.askYN("Is it about "+ it.intent.getString("compulsory") + it.intent.getString("modules") + " in "+
+                       currentprogrammename + " programme ");
+               if(confirmation){
+                   println("Reached with compulsory modules and current programme  here")
+                   call(ModuleInformation(database, currentprogrammename, null,true,true));
+                   println("Reached again here after info")
+                   moreInfoFlag = true;
+                   reentry();
+               }else{
+                   furhat.ask({ random{
+                       +"Could you please repeat your last query?"
+                   }});
+               }
+           }
+           else{
+               repeatprogrammeName = it.intent.getString("programmename")
+               val confirmation = furhat.askYN(it.intent.toString());
+               if(confirmation){
+                   println("Reached with compulsory modules and current programme  here")
+                   call(ModuleInformation(database, it.intent.getString("programmename"), null,true,true));
+                   println("Reached again here after info")
+                   moreInfoFlag = true;
+                   reentry();
+               }else{
+                   furhat.ask({ random{
+                       +"Could you please repeat your last query?"
+                   }});
+               }
+           }
+
+
+        }
+
+
+    }
+
+
+    onResponse<RoomInformationIntent>{
+        furhat.gesture(Gestures.Oh());
+
+        staffIntentFlag = false;
+        moduleIntentFlag = false;
+        staffRoomIntentFlag = true;
+
+        if(it.intent.getString("staffname")!=null && it.intent.getString("room")!=null) {
+            repeatprofnameRoom = it.intent.getString("staffname");
+            repeatroomname = null
+            val confirmation = furhat.askYN(it.intent.toString());
+            if (confirmation) {
+                println("Reached with staff and room here")
+                call(RoomInformation(database, it.intent.getString("staffname")));
                 println("Reached again here after info")
                 moreInfoFlag = true;
                 reentry();
-            }else{
-                furhat.ask({ random{
-                    +"Could you please repeat your last query?"
-                }});
+            } else {
+                furhat.ask({
+                    random {
+                        +"Could you please repeat your last query?"
+                    }
+                });
             }
         }
-
-
+        else if(it.intent.getString("roomname")!=null ) {
+            println("Reached here")
+            repeatprofnameRoom = null
+            repeatroomname = it.intent.getString("roomname")
+            val confirmation = furhat.askYN(it.intent.toString());
+            if (confirmation) {
+                println("Reached with roomname here")
+                call(RoomInformation(database, null,it.intent.getString("roomname")));
+                println("Reached again here after info")
+                moreInfoFlag = true;
+                reentry();
+            } else {
+                furhat.ask({
+                    random {
+                        +"Could you please repeat your last query?"
+                    }
+                });
+            }
+        }
     }
+
+
 
     onResponse<No> {
         furhat.say {
-            +Gestures.BigSmile()
-            +"Hope I could help you with some information today"
-            +Gestures.BigSmile()
-            +"Good Bye and Have a great day !!!"
-            +Gestures.BigSmile()
+            +Gestures.BigSmile
+            random{
+                +"I'm glad I could help. If you have any more questions in the future, feel free to ask. Goodbye!"
+                +"Thank you for reaching out. I hope the information was useful. Have a wonderful day. Goodbye!"
+                +"Wishing you a fantastic day ahead. If you ever need information again, don't hesitate to chat. Goodbye!"
+                +"Take care and stay informed. If you've got more questions, I am here to help. Goodbye!"
+                +"I'm here whenever you need more information. Until next time, goodbye!"
+                +"Don't hesitate to return if you need more assistance. Have a great day and goodbye!"
+                +"I'm glad I could provide the information you needed. Stay curious and have a wonderful day. Goodbye!"
+                +"I hope I've answered your questions. I wish you a pleasant day. Goodbye!"
+                +"Thanks for the conversation. Take care and stay curious. Goodbye!"
+                +"If you ever need information, don't hesitate to return. Goodbye!"
+                +"Thank you for engaging in this conversation. If you have more queries down the line,I'll be here. Goodbye!"
+                +"I'm grateful for the opportunity to assist you. Wishing you a wonderful day. Goodbye!"
+            }
+            +Gestures.BigSmile
+            +Gestures.Smile
         }
+        terminate()
     }
+
+
     onResponseFailed {
         furhat.say {
             +Gestures.Nod()

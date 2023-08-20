@@ -10,7 +10,62 @@ class ProgrammeNames :ListEntity<Programme>()
 class SemesterNames: ListEntity<Semester>()
 class ModuleSynonyms: ListEntity<Modules>()
 class CompulsorySynonyms: ListEntity<Compulsory>()
+
+class RoomSynonyms:ListEntity<Rooms>()
+class RoomNames:ListEntity<RoomName>()
 class RepeatEntity: ListEntity<Repeat>()
+
+class Rooms: EnumEntity(speechRecPhrases = true) {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf(
+            "Chamber",
+            "Space",
+            "Area",
+            "Quarters",
+            "Cubicle",
+            "room"
+            )
+
+
+    }
+}
+
+class RoomName: EnumEntity(speechRecPhrases = true) {
+
+    override fun getEnum(lang: Language): List<String> {
+        return listOf(
+            "Lovelace Ada Room",
+            "Verification & Testing Lab",
+            "Resource Room",
+            "Machine Learning Lab",
+            "Hearing & Speech Lab",
+            "Student Lab",
+            "Social Space",
+            "Meeting Room",
+            "Reception",
+            "Computer Vision, PGR Workspace",
+            "Foundations of Computing",
+            "Foundations of Computing",
+            "Meeting Room",
+            "Staff Room",
+            "Consultation Room",
+            "Research Software Engineering Team",
+            "Pervasive Computing Lab",
+            "Pervasive Computing Lab",
+            "Music Room",
+            "Meeting Room",
+            "Algorithms Research",
+            "Security of Advanced Systems Research",
+            "Hearing & Speech",
+            "NLP Research Workspace",
+            "Centre for Doctoral Training",
+            "NLP Lab"
+        )
+
+
+    }
+}
 
 class Repeat: EnumEntity(speechRecPhrases = true) {
 
