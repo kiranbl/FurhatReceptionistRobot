@@ -18,7 +18,7 @@ class StaffInformationIntent(
     val staffname : ProfessorNames? = null,
     val staffemail : MailEntity? = null,
     val staffrole : RoleEntity? = null
-) : Intent(), TextGenerator {
+) : Intent() {
     override fun getExamples(lang: Language): List<String> {
         return listOf(
             "Can you tell me about Professor @staffname in the computer science department",
@@ -44,25 +44,31 @@ class StaffInformationIntent(
 
         )
     }
-    override fun toText(lang : Language) : String {
-        return generate(
-            "Is it about professor $staffname $staffemail ? | Is it about professor $staffname $staffrole in the department ?? | Is it about professor $staffname ");
-    }
-
-    override fun toString(): String {
-        return toText()
-    }
+//    override fun toText(lang : Language) : String {
+//        println("sTAFF NAME == "+staffname)
+//        return generate(
+//            "Is it about professor $staffname $staffemail ? | Is it about professor $staffname $staffrole in the department ?? | Is it about professor $staffname ");
+//    }
+//
+//    override fun toString(): String {
+//        return toText()
+//    }
 }
 
 class RoomInformationIntent (
     val staffname : ProfessorNames? = null,
     val room: RoomSynonyms?=null,
     val roomname: RoomNames?=null
-):Intent(),TextGenerator {
+):Intent() {
     override fun getExamples(lang: Language): List<String> {
         return listOf(
 
             //Getting direction for professor room
+            "Where can I @room @staffname ?",
+            "Where can I  @room professor @staffname ?",
+            "I'm  @room for Professor @staffname" ,
+            "Hello, I'm  @room for Professor @staffname" ,
+            "Hello, I'm looking for Professor @staffname's @room" ,
             "Where can I find @staffname @room ?",
             "Where can I find  @staffname @room in the department ?",
             "Where can I find  professor @staffname @room in the department",
@@ -77,7 +83,7 @@ class RoomInformationIntent (
             "Good day, I'm trying to find Professor @staffname's @room. Could you guide me to it, please?",
             "Excuse me, could you please help me with directions to Professor @staffname's @room in the computer science department?",
             "Hello, I'm looking for Professor @staffname's @room . Could you guide me there?",
-            "Good morning/afternoon, I need to find Professor @staffname's @room in the computer science department. Can you point me in the right direction?",
+            "Good morning, I need to find Professor @staffname's @room in the computer science department. Can you point me in the right direction?",
             "Hi there, I'm trying to locate Professor @staffname's @room in the computer science department. Would you be able to assist me?",
             "Hello, I have an appointment with Professor @staffname , but I'm not sure where their @room is. Could you give me directions?",
             "Excuse me, I need to visit Professor @staffname and I'm a bit lost. Could you provide me with directions to their @room?",
@@ -89,6 +95,8 @@ class RoomInformationIntent (
 
             //Give direction for labs and rooms
             "Where can I find @roomname",
+            "I am looking for the @roomname room",
+            "I am looking for the @roomname",
             "Excuse me, could you please tell me how to get to the @roomname?",
             "Can you guide me to the @roomname?",
             "Hey, do you know where I can find the @roomname?",
@@ -102,15 +110,16 @@ class RoomInformationIntent (
         )
 
     }
-    override fun toText(lang : Language) : String {
-        return generate(
-            "Do you want to know the directions for professor $staffname $room ? | " +
-                    "Do you want to know the directions for $roomname ?");
-    }
-
-    override fun toString(): String {
-        return toText()
-    }
+//    override fun toText(lang : Language) : String {
+//        println("Staff Room Name "+staffname)
+//        return generate(
+//            "Do you want to know the directions for professor $staffname room ? | " +
+//                    "Do you want to know the directions for $roomname ?");
+//    }
+//
+//    override fun toString(): String {
+//        return toText()
+//    }
 }
 //class RepeatInformationIntent(
 //    val repeat : RepeatEntity? = null

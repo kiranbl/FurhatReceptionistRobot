@@ -1,5 +1,6 @@
 package furhatos.app.furhatreceptionist.flow
 
+import furhatos.app.furhatreceptionist.flow.main.Greeting
 import furhatos.app.furhatreceptionist.flow.main.Idle
 import furhatos.flow.kotlin.*
 
@@ -16,9 +17,12 @@ val Parent: State = state {
         when {
             !users.hasAny() -> { // last user left
                 furhat.attendNobody()
-                goto(Init)
+                goto(Idle)
             }
-            furhat.isAttending(it) -> furhat.attend(users.other) // current user left
+            furhat.isAttending(it) -> {
+                furhat.attend(users.other)
+                goto(Greeting)
+            } // current user left
             !furhat.isAttending(it) -> furhat.glance(it.head.location) // other user left, just glance
         }
     }

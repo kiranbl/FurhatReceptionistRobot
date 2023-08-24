@@ -1,6 +1,8 @@
 package furhatos.app.furhatreceptionist.flow.main
 
 
+import com.mongodb.client.MongoClient
+import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoDatabase
 import furhatos.app.furhatreceptionist.flow.Parent
 import furhatos.app.furhatreceptionist.nlu.StaffInformationIntent
@@ -11,6 +13,7 @@ import furhatos.flow.kotlin.*
 import furhatos.gestures.Gestures
 import furhatos.nlu.common.No
 import furhatos.nlu.common.RequestRepeat
+import furhatos.util.Language
 import java.util.*
 
 var currentprogrammename:String? =null
@@ -33,23 +36,101 @@ var moduleIntentFlag:Boolean=false
 var staffIntentFlag:Boolean=false
 var staffRoomIntentFlag:Boolean=false
 
-fun Greeting(database: MongoDatabase)= state(Parent) {
+fun connectToMongoDB(): MongoDatabase {
+    val connectionString = "mongodb+srv://FurhatReceptionRobot:Robot123@furhatrecptionistcluste.np7i1yx.mongodb.net/?retryWrites=true&w=majority"
+    val mongoClient: MongoClient = MongoClients.create(connectionString)
+    return mongoClient.getDatabase("FurhatReceptionist")
+}
+
+//println(timeofday)
+
+//val greeting = utterance {
+//    random {
+//        +"Hello Nice to meet you"
+//        +"Hey Pleasure to meet you"
+//        +"Good to see you"
+//        +"Good $timeofday !!! Nice to meet you "
+//    }
+//
+//}
+//val askhelp = utterance {
+//    random {
+//        +"Can I help you with anything related to department?"
+//        +"Do you need any assistance?"
+//        +"Is there anything I can help you with related to the department?"
+//        +"Would you like some help?"
+//        +"Do you need help or information about the department?"
+//        +"Is there something I can assist you with?"
+//        +"May I offer you information related to the department?"
+//        +"Are you looking for any specific information related to our department?"
+//        +"Can I provide you with any help or guidance?"
+//        +"Do you require any help or details regarding our department?"
+//        +"Is there anything you would like to know or need help with our department?"
+//        +"Would you like me to assist you with information about our department?"
+//        +"Can I be of any help or give you information on something related to department?"
+//        +"Do you need any support or have questions about our department?"
+//        +"Is there anything in particular you need help with or want to know about in our department?"
+//        +"Is there a specific topic or area you need assistance or information on our department?"
+//        +"Do you have any inquiries or need assistance with anything related to department?"
+//        +"Can I help you find what you're looking for or provide more information on our department?"
+//        +"Are you seeking help or information regarding a specific matter related to the department?"
+//        +"Do you need any help or have any questions about the department?"
+//    }
+//}
+
+fun getStaffName(name: String): String {
+    var namelist = listOf(
+        "Roger K Moore",
+        "Guy Brown",
+        "Temitope Adeosun",
+        "Behzad Abdolmaleki",
+        "Nikos Aletras",
+        "Jon Barker",
+        "Harsh Beohar",
+        "Kirill Bogdanov",
+        "Kalina Bontcheva",
+        "Gergely Buday",
+        "Zhixiang Chen",
+        "Heidi Christensen",
+        "John Clark",
+        "Richard Clayton",
+        "Mike Cruchten",
+        "Hamish Cunningham",
+        "John Derrick",
+        "Benjamin Dowling",
+        "Islam Elgendy",
+        "Matt Ellis",
+        "Andreas Feldmann",
+        "Rob Gaizauskas",
+        "Stefan Goetze",
+        "Prosanta Gope",
+        "Yoshi Gotoh",
+        "Philip Green",
+        "Charles Grellois",
+        "Thomas Hain",
+        "Jungong Han",
+        "Rob Hierons",
+        "Mark Hepple"
+    )
+
+    return namelist.find {it.contains(name, ignoreCase = true)}!!
+
+}
+
+
+val Greeting :State = state(Parent) {
+
+
+    var database: MongoDatabase = connectToMongoDB();
+
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     var moreInfoFlag :Boolean = false;
-    println(hour)
+//println(hour)
     val timeofday = when{
         hour<12 -> "Morning"
         hour in 13..17 -> "Afternoon"
         else -> "Evening"
     }
-    println(timeofday)
-    val greeting = utterance {
-
-    }
-    val askhelp = utterance {
-
-    }
-
     onEntry {
         furhat.gesture(Gestures.Smile)
         furhat.say {
@@ -87,6 +168,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
     }
     onReentry {
         if(!moreInfoFlag) {
+            furhat.ledStrip.solid(java.awt.Color.WHITE)
             furhat.ask({
                 random {
                     +"Can I help you with anything related to department?"
@@ -113,6 +195,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             })
         }
         else{
+            furhat.ledStrip.solid(java.awt.Color.WHITE)
             furhat.ask({
                 random {
                     +"Can I help you with anything else?"
@@ -130,10 +213,10 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
     }
 
 
-    onUserEnter {
-        furhat.say({ random { greeting } })
-        furhat.ask({ random{askhelp}})
-    }
+//    onUserEnter {
+//        furhat.say { random { greeting } }
+//        furhat.ask{ random{askhelp} }
+//    }
     onResponse<RequestRepeat> {
         furhat.say{
             + Gestures.Smile
@@ -170,21 +253,23 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
 
     }
     onResponse<StaffInformationIntent>{
-        furhat.gesture(Gestures.Oh());
+        //furhat.gesture(Gestures.Oh());
 
         staffIntentFlag = true;
         moduleIntentFlag = false;
         staffRoomIntentFlag = false;
+        println("Identified Staff name "+it.intent.getString("staffname"));
+        var staffname:String = getStaffName(it.intent.getString("staffname"))
+        println("Found Staff name "+staffname);
 
-        println(it.intent.getString("staffname"));
         if(it.intent.getString("staffname")!=null && it.intent.getString("staffemail")!=null){
-            repeatprofName = it.intent.getString("staffname")
+            repeatprofName = staffname
             repeatprofemail = it.intent.getString("staffemail")
             repeatprofRole=null
-            val confirmation = furhat.askYN(it.intent.toString());
+            val confirmation = furhat.askYN( "Is it about professor $staffname"+ it.intent.getString("staffemail") +" ?");
             if(confirmation){
                 println("Reached with name and email here")
-                call(StaffInformation(database,it.intent.getString("staffname"),it.intent.getString("staffemail")));
+                call(StaffInformation(database,staffname,it.intent.getString("staffemail")));
                 println("Reached again here after info")
                 moreInfoFlag = true;
                 reentry();
@@ -195,13 +280,13 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             }
         }
         else if(it.intent.getString("staffname")!=null && it.intent.getString("staffrole")!=null) {
-            repeatprofName = it.intent.getString("staffname")
+            repeatprofName = staffname
             repeatprofRole = it.intent.getString("staffrole")
             repeatprofemail=null
-            val confirmation = furhat.askYN(it.intent.toString());
+            val confirmation = furhat.askYN("Is it about professor $staffname's "+it.intent.getString("staffrole") +"in the department ??");
             if(confirmation){
                 println("Reached with name and role here")
-                call(StaffInformation(database,it.intent.getString("staffname"),null,it.intent.getString("staffrole")));
+                call(StaffInformation(database,staffname,null,it.intent.getString("staffrole")));
                 println("Reached again here after info")
                 moreInfoFlag = true;
                 reentry();
@@ -212,12 +297,12 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             }
         }
         else{
-            repeatprofName = it.intent.getString("staffname")
+            repeatprofName = staffname
             repeatprofRole = null
             repeatprofemail=null
-            val confirmation = furhat.askYN(it.intent.toString());
+            val confirmation = furhat.askYN("Is it about professor $staffname ");
             if(confirmation){
-                call(StaffInformation(database,it.intent.getString("staffname")));
+                call(StaffInformation(database,staffname));
                 println("Reached again here after info")
                 moreInfoFlag = true;
                 reentry();
@@ -230,7 +315,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
         }
 
     onResponse<ModuleInformationIntent>{
-        furhat.gesture(Gestures.Oh());
+        //furhat.gesture(Gestures.Oh());
 
         staffIntentFlag = false;
         moduleIntentFlag = true;
@@ -376,19 +461,20 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
 
 
     onResponse<RoomInformationIntent>{
-        furhat.gesture(Gestures.Oh());
+        //furhat.gesture(Gestures.Oh());
 
         staffIntentFlag = false;
         moduleIntentFlag = false;
         staffRoomIntentFlag = true;
 
+        var staffname = getStaffName( it.intent.getString("staffname"));
         if(it.intent.getString("staffname")!=null && it.intent.getString("room")!=null) {
-            repeatprofnameRoom = it.intent.getString("staffname");
+            repeatprofnameRoom = staffname;
             repeatroomname = null
-            val confirmation = furhat.askYN(it.intent.toString());
+            val confirmation = furhat.askYN("Do you want to know the directions for professor $staffname room ?");
             if (confirmation) {
                 println("Reached with staff and room here")
-                call(RoomInformation(database, it.intent.getString("staffname")));
+                call(RoomInformation(database, staffname));
                 println("Reached again here after info")
                 moreInfoFlag = true;
                 reentry();
@@ -404,7 +490,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             println("Reached here")
             repeatprofnameRoom = null
             repeatroomname = it.intent.getString("roomname")
-            val confirmation = furhat.askYN(it.intent.toString());
+            val confirmation = furhat.askYN("Do you want to know the directions for"+ it.intent.getString("roomname")+" ?");
             if (confirmation) {
                 println("Reached with roomname here")
                 call(RoomInformation(database, null,it.intent.getString("roomname")));
@@ -425,7 +511,6 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
 
     onResponse<No> {
         furhat.say {
-            +Gestures.BigSmile
             random{
                 +"I'm glad I could help. If you have any more questions in the future, feel free to ask. Goodbye!"
                 +"Thank you for reaching out. I hope the information was useful. Have a wonderful day. Goodbye!"
@@ -435,7 +520,7 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
                 +"Don't hesitate to return if you need more assistance. Have a great day and goodbye!"
                 +"I'm glad I could provide the information you needed. Stay curious and have a wonderful day. Goodbye!"
                 +"I hope I've answered your questions. I wish you a pleasant day. Goodbye!"
-                +"Thanks for the conversation. Take care and stay curious. Goodbye!"
+                +"Thanks for the conversation. Take care and Goodbye!"
                 +"If you ever need information, don't hesitate to return. Goodbye!"
                 +"Thank you for engaging in this conversation. If you have more queries down the line,I'll be here. Goodbye!"
                 +"I'm grateful for the opportunity to assist you. Wishing you a wonderful day. Goodbye!"
@@ -443,9 +528,13 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             +Gestures.BigSmile
             +Gestures.Smile
         }
-        terminate()
-    }
 
+        //terminate()
+    }
+//
+//    onUserLeave {
+//        goto(Idle)
+//    }
 
     onResponseFailed {
         furhat.say {
@@ -455,7 +544,8 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             +"Please try again later !!!"
             +Gestures.BigSmile()
         }
-        terminate()
+        //goto(Idle())
+        //terminate()
     }
     onNetworkFailed {
         furhat.say {
@@ -465,7 +555,8 @@ fun Greeting(database: MongoDatabase)= state(Parent) {
             +"Please try again later !!!"
             +Gestures.BigSmile()
         }
-        terminate()
+        //goto(Idle())
+        //terminate()
     }
 }
 

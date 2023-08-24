@@ -26,6 +26,11 @@ import com.google.api.client.util.store.FileDataStoreFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.model.ValueRange
 import com.mongodb.client.MongoCollection
+import furhatos.flow.kotlin.furhat.characters.Characters
+import furhatos.flow.kotlin.voice.PollyNeuralVoice
+import furhatos.flow.kotlin.voice.PollyVoice
+import furhatos.flow.kotlin.voice.Voice
+import furhatos.util.Language
 import org.bson.Document
 import java.io.File
 import java.io.FileInputStream
@@ -79,40 +84,25 @@ import java.io.InputStreamReader
 //}
 
 
-fun connectToMongoDB(): MongoDatabase {
-    val connectionString = "mongodb+srv://FurhatReceptionRobot:Robot123@furhatrecptionistcluste.np7i1yx.mongodb.net/?retryWrites=true&w=majority"
-    val mongoClient: MongoClient = MongoClients.create(connectionString)
-    return mongoClient.getDatabase("FurhatReceptionist")
-}
-var database: MongoDatabase = connectToMongoDB();
 
 val Init: State = state {
     init {
         /** Set our default interaction parameters */
         users.setSimpleEngagementPolicy(DISTANCE_TO_ENGAGE, MAX_NUMBER_OF_USERS)
-        database = connectToMongoDB()
+        furhat.setCharacter(Characters.Adult.Titan);
+        furhat.voice = PollyNeuralVoice.Amy();
+        furhat.setVoice(Language.ENGLISH_GB)
         //getData(database)
     }
     onEntry {
         /** start interaction */
         when {
-            furhat.isVirtual() -> goto(Greeting(database)) // Convenient to bypass the need for user when running Virtual Furhat
+            furhat.isVirtual() -> goto(Greeting) // Convenient to bypass the need for user when running Virtual Furhat
             users.hasAny() -> {
                 furhat.attend(users.random)
-                goto(Greeting(database))
+                goto(Greeting)
             }
-            else -> goto(Idle(database))
-        }
-    }
-    onReentry {
-        database = connectToMongoDB()
-        when {
-            furhat.isVirtual() -> goto(Greeting(database)) // Convenient to bypass the need for user when running Virtual Furhat
-            users.hasAny() -> {
-                furhat.attend(users.random)
-                goto(Greeting(database))
-            }
-            else -> goto(Idle(database))
+            else -> goto(Idle)
         }
     }
 

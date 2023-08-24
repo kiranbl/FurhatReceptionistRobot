@@ -36,10 +36,10 @@ var previousSpeech: String?=null;
 fun queryStaffCollection(database: MongoDatabase,profName: String,profemail: Boolean?=false,profrole: Boolean?=false): String {
     val collection: MongoCollection<Document> = database.getCollection("staffInformation")
     println("Reached queryCOlleciton "+profName.capitalize())
-    val words = profName.split(" ").map { it.capitalize() }.joinToString(" ")
+    val regexPattern = Pattern.compile(profName, Pattern.CASE_INSENSITIVE)
 
-    println("Reached queryCOlleciton after capitalize "+words)
-    val filter = Document("name", words)
+    val filter = Document("name", regexPattern)
+    println("Filter"+filter)
     val result = collection.find(filter).toList();
     println("Reached queryCOlleciton Result "+result)
     // Process the query results
@@ -114,8 +114,9 @@ fun queryRoomCollection(database: MongoDatabase,profName: String?=null,roomName:
         regexPattern = Pattern.compile(roomName, Pattern.CASE_INSENSITIVE)
 
     }
-    println("Reached queryCOlleciton after capitalize " + words)
+    println("Reached queryCOlleciton after capitalize " + regexPattern)
     val filter = Document("name", regexPattern)
+    println("Filter"+filter)
     val result = collection.find(filter);
     println("Reached queryCOlleciton Result " + result)
     // Process the query results
@@ -139,7 +140,7 @@ fun queryRoomCollection(database: MongoDatabase,profName: String?=null,roomName:
 
 fun StaffInformation(database:MongoDatabase,profName : String,profemail:String?=null,profRole:String?=null,repeatFlag:Boolean=false)  = state(Parent) {
     onEntry {
-
+        furhat.ledStrip.solid(java.awt.Color.GREEN)
         //val database = connectToMongoDB()
         var data:String?="";
         println("Database "+database)
@@ -186,7 +187,12 @@ fun StaffInformation(database:MongoDatabase,profName : String,profemail:String?=
                     +"The email address is spelled as follows."
                 }}
                 println("email address "+data)
+                val atIndex:Int=data.indexOf('@');
+                val restofEmail = data.substring(atIndex )
                 for (letter in data) {
+                    if(letter=='@') {
+                        break;
+                    }
                     if(letter=='.'){
                      furhat.say("dot")
                         continue;
@@ -196,6 +202,8 @@ fun StaffInformation(database:MongoDatabase,profName : String,profemail:String?=
                    furhat.say(letter.toString())
 
                 }
+                furhat.say(restofEmail)
+
             }
             else if(profRole!=null){
                 furhat.say{
@@ -228,6 +236,7 @@ fun ModuleInformation(database:MongoDatabase,
                       compulsory:Boolean?=false,
                       repeatFlag: Boolean=false) = state(Parent) {
     onEntry {
+        furhat.ledStrip.solid(java.awt.Color.GREEN)
         println("Database " + database)
         if(!repeatFlag){
         furhat.say{+ Gestures.GazeAway
@@ -357,7 +366,8 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
     onEntry {
 
         //val database = connectToMongoDB()
-
+        println("Room info prof name"+profName)
+        furhat.ledStrip.solid(java.awt.Color.GREEN)
         println("Database "+database)
         if(!repeatFlag) {
             furhat.say {
@@ -443,7 +453,9 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
             else {
 
                     var floornum = data[0]["floor"]
-                    var roomnum = data[0]["roomnumber"]
+                    var roomnumString= data[0]["roomnumber"].toString()
+                    val numericString = data[0]["roomnumber"].toString().filter { it.isDigit() }
+                    var roomnum:Int? = numericString.toIntOrNull();
                     when (floornum) {
                         "1" -> floornum = "first"
                         "2" -> floornum = "second"
@@ -456,11 +468,11 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
                             random {
                                 +"You can find the professor $profName in room number $roomnum."
                                 +"The $profName's office is located in room number $roomnum."
-                                +"If you're looking for the $profName, their office is in room number $roomnum."
-                                +"Room number $roomnum is where you'll find the $profName's office."
-                                +"To meet with the $profName, go to room number $roomnum."
-                                +"The $profName's room is assigned as number $roomnum."
-                                +"If you need to speak to the $profName, they're in room number $roomnum."
+                                +"If you're looking for professor $profName, their office is in room number $roomnum."
+                                +"Room number $roomnum is where you'll find $profName's office."
+                                +"To meet with professor $profName, go to room number $roomnum."
+                                +"$profName's room is assigned as number $roomnum."
+                                +"If you need to speak to $profName, they're in room number $roomnum."
                                 +"Professor $profName can be located in room number $roomnum."
                             }
                         }
@@ -475,14 +487,7 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
                                 +"The room's location is on the $floornum floor."
                             }
                         }
-//                if(floornum=="second"){
-//
-//                }else if(floornum == "first" || floornum == "third"){
-//
-//                }
-//                else{
-//
-//                }
+
 
                     } else if (roomName != null) {
 
@@ -508,6 +513,113 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
                                 +"The room's location is on the $floornum floor."
                             }
                         }
+                    }
+
+                    if(floornum=="second"){
+                        when(roomnum){
+                            in 203..212 -> furhat.say{
+
+                                    +"To get to the room you're looking for, simply continue back down the hallway until you reach the end where you can find a door. The room $roomnumString will be just after that door. Do check for the numbers on the room doors ."
+                                }
+
+                             in 213..236 -> furhat.say{
+                                    +"To get to the room you're looking for, to my left is where you can find a door. The room $roomnumString will be just after that door. Do check for the numbers on the room doors ."
+                                }
+                        }
+//                        if(roomnum in 203..212){
+//                            furhat.say{
+//
+//                                +"To get to the room you're looking for, simply continue back down the hallway until you reach the end where you can find a door. The room $roomnumString will be just after that door. Do check for the numbers on the room doors ."
+//                            }
+//                        }
+//                        else if(roomnum in 213..236){
+//                            furhat.say{
+//                                +"To get to the room you're looking for, to my left is where you can find a door. The room $roomnumString will be just after that door. Do check for the numbers on the room doors ."
+//                            }
+//                        }
+                    }else if(floornum == "first" || floornum == "third"){
+
+                        when(roomnum){
+                            in 303..306 ->   furhat.say{
+                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your left, and the room $roomnumString will be over there."
+                            }
+
+                            in 307..326 -> furhat.say{
+                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your right, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
+                            }
+
+                            in 104..130 -> furhat.say{
+                                    +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your left, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
+                                }
+                            in 132..155 -> furhat.say{
+                                    +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your right, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
+                                }
+                        }
+//                        if(roomnum in 303..306){
+//                            furhat.say{
+//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your left, and the room $roomnumString will be over there."
+//                            }
+//                        }
+//                        else if(roomnum in 307..326){
+//                            furhat.say{
+//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your right, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
+//                            }
+//                        }
+//                        else if(roomnum in 104..130){
+//                            furhat.say{
+//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your left, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
+//                            }
+//                        }
+//                        else if(roomnum in 132..155){
+//                            furhat.say{
+//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your right, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
+//                            }
+//                        }
+
+                    }
+                    else{
+                        if(roomnumString.contains("CG")){
+                            when(roomnum){
+                                in 4..19 ->
+                                    furhat.say {
+                                        +"The room is located in the West Side of the Regent Court on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, proceed to exit through the main doors of this building, just across the courtyard opposite to this building is the West Side of the Regent Court,  go through the main door and take the door on your right , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+                                    }
+                               in 40..44 ->
+                                furhat.say {
+                                    +"The room is located in the West Side of the Regent Court on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, proceed to exit through the main doors of this building, just across the courtyard opposite to this building is the West Side of the Regent Court,  go through the main door and take the door on your left , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+                                }
+
+                            }
+//                            if (roomnum in 4..19) {
+//                                furhat.say {
+//                                    +"The room is located in the West Side of the Regent Court on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, proceed to the main doors of this building, just across the courtyard opposite to this building is the West Side of the Regent Court,  go through the main door and take the door on your right , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+//                                }
+//                            } else if (roomnum in 40..44) {
+//                                furhat.say {
+//                                    +"The room is located in the West Side of the Regent Court on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, proceed to the main doors of this building, just across the courtyard opposite to this building is the West Side of the Regent Court,  go through the main door and take the door on your left , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+//                                }
+//                            }
+                        }
+                        else {
+                            when(roomnum){
+                                in 25..38 -> furhat.say {
+                                        +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, after getting out from the elevator, go through the door on your right , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+                                    }
+                                in 9..22 -> furhat.say {
+                                    +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, after getting out from the elevator, go through the door on your left , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+                                }
+                            }
+//                            if (roomnum in 25..38) {
+//                                furhat.say {
+//                                    +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, after getting out from the elevator, go through the door on your right , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+//                                }
+//                            } else if (roomnum in 9..22) {
+//                                furhat.say {
+//                                    +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, after getting out from the elevator, go through the door on your left , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
+//                                }
+//                            }
+                        }
+
                     }
                 }
             infoFlag=false;
