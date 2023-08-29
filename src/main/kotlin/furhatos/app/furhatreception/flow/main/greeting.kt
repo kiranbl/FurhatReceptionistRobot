@@ -110,7 +110,63 @@ fun getStaffName(name: String): String {
         "Thomas Hain",
         "Jungong Han",
         "Rob Hierons",
-        "Mark Hepple"
+        "Mark Hepple",
+        "Tahsinur Khan",
+        "Vitaveska Lanfranchi",
+        "James Law",
+        "Jochen Leidner",
+        "Andrew Lewis-Smith",
+        "Chenghua Lin",
+        "Robert Loftin",
+        "Haiping Lu",
+        "Alexandr Lucas",
+        "Fatima Maikore",
+        "Steve Maddock",
+        "Luca Manneschi",
+        "Michael Mangan",
+        "James Marshall",
+        "Phil McMinn",
+        "John McNamara",
+        "Nafise Sadat Moosavi",
+        "Sagnik Mukhopadhyay",
+        "Emma Norling",
+        "Siobhán North",
+        "Olakunle Olayinka",
+        "Pietro Oliveto",
+        "Varvara Papazoglou",
+        "Aryan Pasikhani",
+        "Andrei Popescu",
+        "Tony Prescott",
+        "Anton Ragni",
+        "Paul Richmond",
+        "José Miguel Rojas",
+        "Max Sandström",
+        "Carolina Scarton",
+        "Areeb Sherwani",
+        "Donghwan Shin",
+        "Anthony Simons",
+        "Michael Smith",
+        "Xingyi Song",
+        "Joachim Spoerhase",
+        "Mike Stannett",
+        "Mark Stevenson",
+        "Andrew Stratton",
+        "Georg Struth",
+        "Navid Talebanfard",
+        "Ramsay Taylor",
+        "Eleni Vasilaki",
+        "Mari Cruz Villa Uriol",
+        "Aline Villavicencio",
+        "Jonni Virtema",
+        "Dawn Walker",
+        "Neil Walkinshaw",
+        "Paul Watton",
+        "Stuart Wilson",
+        "Bhagya Wimalasiri",
+        "Joab Winkler",
+        "Po Yang",
+        "Shuo Zhou",
+        "Maksim Zhukovskii"
     )
 
     return namelist.find {it.contains(name, ignoreCase = true)}!!
@@ -466,8 +522,11 @@ val Greeting :State = state(Parent) {
         staffIntentFlag = false;
         moduleIntentFlag = false;
         staffRoomIntentFlag = true;
+        var staffname: String? =null;
+        if(it.intent.getString("staffname")!=null){
+            staffname = getStaffName( it.intent.getString("staffname"));
+        }
 
-        var staffname = getStaffName( it.intent.getString("staffname"));
         if(it.intent.getString("staffname")!=null && it.intent.getString("room")!=null) {
             repeatprofnameRoom = staffname;
             repeatroomname = null
@@ -490,7 +549,7 @@ val Greeting :State = state(Parent) {
             println("Reached here")
             repeatprofnameRoom = null
             repeatroomname = it.intent.getString("roomname")
-            val confirmation = furhat.askYN("Do you want to know the directions for"+ it.intent.getString("roomname")+" ?");
+            val confirmation = furhat.askYN("Do you want to know the directions for "+ it.intent.getString("roomname")+" ?");
             if (confirmation) {
                 println("Reached with roomname here")
                 call(RoomInformation(database, null,it.intent.getString("roomname")));
@@ -535,7 +594,19 @@ val Greeting :State = state(Parent) {
 //    onUserLeave {
 //        goto(Idle)
 //    }
+    onResponse {
+        furhat.say{
+            +Gestures.Smile
+            +"Sorry, I didn't understand that. "
+            random {
+                +"You can ask me information related to our department. You can ask information about a professor, about the professor role and even their email address."
+                +"You can ask me information related to our department. You can ask information about modules in a particular programme, about compulsory modules in a programme and what are the modules that happen in a particular semester."
+                +"You can ask me information related to our department. You can ask directions to professor's room , or , for a particular room. "
 
+            }
+        }
+        reentry();
+    }
     onResponseFailed {
         furhat.say {
             +Gestures.Nod()

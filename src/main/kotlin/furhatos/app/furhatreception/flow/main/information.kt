@@ -466,7 +466,7 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
 
                         furhat.say {
                             random {
-                                +"You can find the professor $profName in room number $roomnum."
+                                +"You can find professor $profName in room number $roomnum."
                                 +"The $profName's office is located in room number $roomnum."
                                 +"If you're looking for professor $profName, their office is in room number $roomnum."
                                 +"Room number $roomnum is where you'll find $profName's office."

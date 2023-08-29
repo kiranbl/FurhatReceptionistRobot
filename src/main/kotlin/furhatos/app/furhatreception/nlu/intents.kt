@@ -27,22 +27,56 @@ class StaffInformationIntent(
             "@staffname information",
             "Could you provide some information about @staffname?",
             "I'm interested in learning about @staffname who works in the Computer Science department. Can you help?",
+            "Could you provide me with details about the professor @staffname in the our department?",
+            "Could you provide me with details about the professor @staffname in the computer science department?",
+            "I'm looking for information on the @staffname in the computer science department.",
+            "Can you tell me more about professor @staffname who teach in the computer science department?",
+            "I'd like to learn about the professor @staffname who are part of the computer science department.",
+            "Do you have any information about the @staffname ?",
+            "I'd appreciate it if you could share some information about @staffname department.",
+
             //Staff name and email
             "what is the @staffemail for Professor @staffname",
             "I wanted the @staffname's @staffemail id",
             "Could you please give me the @staffemail of @staffname?",
             "Would you mind sharing professor @staffname @staffemail ID with me, please?",
             "Could you please provide me with @staffname @staffemail address?",
+            "What is the @staffemail of the professor @staffname in the department?",
+            "Could you provide me with the  @staffemail of the professor @staffname from this department?",
+            "How can I reach out to the @staffname in this department via @staffemail?",
+            "Can you share the @staffemail contact for the @staffname in this department?",
+            "I'd like to get in touch with the professor @staffname. Could you give me their @staffemail?",
+            "What is the best way to contact professor @staffname? Is there an @staffemail I can use?",
+            "Could you please provide the @staffemail for professor @staffname in this department?",
+            "How do I send an email to the @staffname? Can you share their @staffemail?",
+            "I'm interested in connecting with the professor @staffname. Can you give me their @staffemail?",
+            "What's the @staffname's @staffemail? I'd like to send them an email.",
+            "Can you give me the @staffemail contact details for professor @staffname in the department?",
+            "How can I contact professor @staffname via email? Is there an @staffemail available?",
+            "I need to get in touch with professor @staffname. Can you provide their @staffemail?",
+            "What @staffemail should I use to reach out to professor @staffname in the department?",
+            "Is there an  @staffemail I can use to communicate with professor @staffname?",
+            "How do I send an email to professor @staffname? Can you provide the @staffemail?",
+            "I'd appreciate it if you could give me the @staffemail of professor @staffname.",
+            "What is the professor @staffname's preferred @staffemail for communication?",
+
             //Staff name and role
             "What is professor @staffname @staffrole within the department?",
             "Could you please outline professor @staffname @staffrole within the department?",
             "What is professor @staffname academic @staffrole within the department?",
             "What is @staffname @staffrole in the department?",
             "What is @staffname @staffrole?",
-            "Give me @staffname @staffrole"
+            "Give me @staffname @staffrole",
+            "What is the @staffrole of professor @staffname within the department?",
+            "Could you describe the @staffrole of @staffname in this department?",
+            "What are the duties associated with a professor @staffname @staffname in the department?",
+            "I'm curious about the @staffrole of a professor @staffname within this department.",
+            "What does a professor @staffname's @staffrole entail within this department?",
+            "I'm interested in learning about the @staffrole of a professor @staffname in this setting.",
+            "I'd like to understand the @staffrole that professor @staffname play within this department.",
+            "What can you tell me about the @staffrole of professor @staffname in this department?"
 
-
-        )
+            )
     }
 //    override fun toText(lang : Language) : String {
 //        println("sTAFF NAME == "+staffname)
