@@ -13,12 +13,12 @@ import java.time.*
 import javax.print.Doc
 
 var infoFlag = false;
-var autumnsemstart = Month.SEPTEMBER;
+var autumnsemstart = Month.OCTOBER;
 var autumnsemend = Month.JANUARY;
 var springsemstart = Month.FEBRUARY;
 var springsemend = Month.JUNE;
 var summersemstart = Month.JULY;
-var summersemend = Month.AUGUST;
+var summersemend = Month.SEPTEMBER;
 val spring = arrayOf("spring","second")
 val autumn = arrayOf("autumn","first")
 val summer = arrayOf("summer","third")
@@ -27,12 +27,7 @@ val nextsem = arrayOf("upcoming","next")
 val prevsem = arrayOf("last","previous")
 var sem: String? = null
 
-var previousSpeech: String?=null;
-//fun connectToMongoDB(): MongoDatabase {
-//    val connectionString = "mongodb+srv://FurhatReceptionRobot:Robot123@furhatrecptionistcluste.np7i1yx.mongodb.net/?retryWrites=true&w=majority"
-//    val mongoClient: MongoClient = MongoClients.create(connectionString)
-//    return mongoClient.getDatabase("FurhatReceptionist")
-//}
+// Function to query the database for the staff related information
 fun queryStaffCollection(database: MongoDatabase,profName: String,profemail: Boolean?=false,profrole: Boolean?=false): String {
     val collection: MongoCollection<Document> = database.getCollection("staffInformation")
     println("Reached queryCOlleciton "+profName.capitalize())
@@ -64,7 +59,7 @@ fun queryStaffCollection(database: MongoDatabase,profName: String,profemail: Boo
     }
 
 }
-
+// Function to query the database for the module related information
 fun queryModuleCollection(database: MongoDatabase,progName: String): List<Document> {
     val collection: MongoCollection<Document> = database.getCollection("moduleInformation")
     println("Reached queryCOlleciton "+progName.capitalize())
@@ -98,7 +93,7 @@ fun queryModuleCollection(database: MongoDatabase,progName: String): List<Docume
     println(sourceDocumentsList)
     return  sourceDocumentsList;
 }
-
+// Function to query the database for the room related information
 fun queryRoomCollection(database: MongoDatabase,profName: String?=null,roomName: String?=null): List<Document> {
     val collection: MongoCollection<Document> = database.getCollection("roomInformation")
     var regexPattern: Pattern? = null
@@ -137,9 +132,10 @@ fun queryRoomCollection(database: MongoDatabase,profName: String?=null,roomName:
     return sourceRoomList
 
 }
-
+// StaffInformation state which inherits the Parent state
 fun StaffInformation(database:MongoDatabase,profName : String,profemail:String?=null,profRole:String?=null,repeatFlag:Boolean=false)  = state(Parent) {
     onEntry {
+        // Setting up Furhat robot LED light color to green when it enters this state
         furhat.ledStrip.solid(java.awt.Color.GREEN)
         //val database = connectToMongoDB()
         var data:String?="";
@@ -228,7 +224,7 @@ fun StaffInformation(database:MongoDatabase,profName : String,profemail:String?=
     }
 }
 
-
+// ModuleInformation state which inherits the Parent state
 fun ModuleInformation(database:MongoDatabase,
                       programmeName:String?=null,
                       semester:String?=null,
@@ -236,6 +232,7 @@ fun ModuleInformation(database:MongoDatabase,
                       compulsory:Boolean?=false,
                       repeatFlag: Boolean=false) = state(Parent) {
     onEntry {
+        // Setting up Furhat robot LED light color to green when it enters this state
         furhat.ledStrip.solid(java.awt.Color.GREEN)
         println("Database " + database)
         if(!repeatFlag){
@@ -253,22 +250,6 @@ fun ModuleInformation(database:MongoDatabase,
 
         var numberofModules = data?.size;
         if (infoFlag) {
-//            if(modulename!=null){
-//                furhat.say("The module number for $modulename is ")
-//                if (data != null) {
-//                    for(document in data){
-//                        if(document.getString("modulename").toLowerCase()==modulename.toLowerCase()){
-//                            furhat.say(document.getString("modulename"))
-//                            break;
-//                        }
-//                        else{
-//                            furhat.say("Sorry but the module number that you requested for is not part of the programme name mentioned." +
-//                                    " Please retry with a correct programme name to which that module belongs to...")
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
              if (programmeName != null && semester==null && modules == false) {
             furhat.say("There are a total of "+numberofModules+" modules to choose from in the programme.")
             furhat.say("There are a few modules which are compulsory and must pass modules !! Those are ")
@@ -290,14 +271,17 @@ fun ModuleInformation(database:MongoDatabase,
              furhat.say("Each module credit is valued at fifteen credits. And you must choose 120 credits from this list which also includes the compulsory modules.")
         }
             else if(programmeName != null && semester!=null && modules==true ){
+                println(semester)
                 val currentDate = LocalDate.now()
                 val currentMonth = currentDate.month
+                 println("current month "+currentMonth)
                  sem = when {
                     currentMonth in autumnsemstart..autumnsemend -> "AUTUMN"
                     currentMonth in springsemstart..springsemend -> "SPRING"
                     currentMonth in summersemstart..summersemend -> "SUMMER"
                      else -> ""
                  }
+                 println(" current semester is: $sem")
 
                 // Adjust the semester based on predefined arrays
                 when {
@@ -361,14 +345,12 @@ fun ModuleInformation(database:MongoDatabase,
 
 }
 
-
+// RoomInformation state which inherits the Parent state
 fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=null, repeatFlag:Boolean=false)  = state(Parent) {
     onEntry {
 
-        //val database = connectToMongoDB()
-        println("Room info prof name"+profName)
+        // Setting up Furhat robot LED light color to green when it enters this state
         furhat.ledStrip.solid(java.awt.Color.GREEN)
-        println("Database "+database)
         if(!repeatFlag) {
             furhat.say {
                 +Gestures.GazeAway
@@ -391,15 +373,6 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
              data = queryRoomCollection(database,null, roomName)
             furhat.stopGestures();
         }
-//        else if(profName!=null && profRole!=null){
-//                data = queryStaffCollection(database,profName,false,true)
-//                furhat.stopGestures();
-//            }
-//            else{
-//
-//                data = queryStaffCollection(database,profName)
-//            furhat.stopGestures();
-//        }
         println(data)
         var norooms = data?.size
         if(infoFlag) {
@@ -526,17 +499,6 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
                                     +"To get to the room you're looking for, to my left is where you can find a door. The room $roomnumString will be just after that door. Do check for the numbers on the room doors ."
                                 }
                         }
-//                        if(roomnum in 203..212){
-//                            furhat.say{
-//
-//                                +"To get to the room you're looking for, simply continue back down the hallway until you reach the end where you can find a door. The room $roomnumString will be just after that door. Do check for the numbers on the room doors ."
-//                            }
-//                        }
-//                        else if(roomnum in 213..236){
-//                            furhat.say{
-//                                +"To get to the room you're looking for, to my left is where you can find a door. The room $roomnumString will be just after that door. Do check for the numbers on the room doors ."
-//                            }
-//                        }
                     }else if(floornum == "first" || floornum == "third"){
 
                         when(roomnum){
@@ -555,26 +517,6 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
                                     +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your right, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
                                 }
                         }
-//                        if(roomnum in 303..306){
-//                            furhat.say{
-//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your left, and the room $roomnumString will be over there."
-//                            }
-//                        }
-//                        else if(roomnum in 307..326){
-//                            furhat.say{
-//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your right, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
-//                            }
-//                        }
-//                        else if(roomnum in 104..130){
-//                            furhat.say{
-//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your left, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
-//                            }
-//                        }
-//                        else if(roomnum in 132..155){
-//                            furhat.say{
-//                                +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, head down the corridor to your right, and the room $roomnumString will be just after that door. Do check for the numbers on the room doors."
-//                            }
-//                        }
 
                     }
                     else{
@@ -590,15 +532,6 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
                                 }
 
                             }
-//                            if (roomnum in 4..19) {
-//                                furhat.say {
-//                                    +"The room is located in the West Side of the Regent Court on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, proceed to the main doors of this building, just across the courtyard opposite to this building is the West Side of the Regent Court,  go through the main door and take the door on your right , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
-//                                }
-//                            } else if (roomnum in 40..44) {
-//                                furhat.say {
-//                                    +"The room is located in the West Side of the Regent Court on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, proceed to the main doors of this building, just across the courtyard opposite to this building is the West Side of the Regent Court,  go through the main door and take the door on your left , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
-//                                }
-//                            }
                         }
                         else {
                             when(roomnum){
@@ -609,15 +542,6 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
                                     +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, after getting out from the elevator, go through the door on your left , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
                                 }
                             }
-//                            if (roomnum in 25..38) {
-//                                furhat.say {
-//                                    +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, after getting out from the elevator, go through the door on your right , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
-//                                }
-//                            } else if (roomnum in 9..22) {
-//                                furhat.say {
-//                                    +"To get to the room on the $floornum floor, take the elevator located over there. Once you're on the $floornum floor, after getting out from the elevator, go through the door on your left , and the room $roomnumString will be after that door. Do check for the numbers on the room doors."
-//                                }
-//                            }
                         }
 
                     }
@@ -634,34 +558,4 @@ fun RoomInformation(database:MongoDatabase, profName: String?, roomName:String?=
     }
 }
 
-//    fun RepeatInformation()  = state(Parent) {
-//    onEntry {
-//        if (previousSpeech != null) {
-//            furhat.say{
-//                + Gestures.Smile
-//                random{
-//                +"Certainly, I'd be happy to go over that information again,"
-//                +"Of course, I'll be glad to repeat the information for you,"
-//                +"Absolutely, I can certainly give you the information once more,"
-//                +"No problem, I'll repeat the information for you,"
-//                +"Sure thing, let me recap the information for you,"
-//                +"Certainly, I'll run through the information again,"
-//                +"Certainly, I'd be happy to provide you with the information once more,"
-//                +"Of course, I'm here to help. Let me repeat the information,"
-//                +"Sure, I can give you the information again if you'd like,"
-//                +"Of course, feel free to ask any questions. I'll repeat the information,"
-//                +"Absolutely, let's go through the information again,"
-//                +"Certainly, let's revisit the information one more time,"
-//                +"Of course, I'll be happy to repeat the details,"
-//                +"Sure, let's go over the information once more,"
-//                +"Certainly, I'll be glad to reiterate the information,"
-//                }
-//            }
-//            furhat.say(previousSpeech!!)
-//        } else {
-//            furhat.say("I haven't said anything to repeat.")
-//        }
-//        terminate()
-//        }
 
-//    }

@@ -3,6 +3,7 @@ import furhatos.nlu.*
 import furhatos.util.*
 import kotlin.sequences.Sequence
 
+// The classes defined below consist of entities defined which could be found in the user utterances
 class ProfessorNames : ListEntity<Names>()
 class MailEntity : ListEntity<Mail>()
 class RoleEntity :ListEntity<Role>()
@@ -13,15 +14,66 @@ class CompulsorySynonyms: ListEntity<Compulsory>()
 
 class RoomSynonyms:ListEntity<Rooms>()
 class RoomNames:ListEntity<RoomName>()
-class RepeatEntity: ListEntity<Repeat>()
 
+class FindSynonyms:ListEntity<Find>()
+
+class Pronouns: ListEntity<PronounsList>()
+
+class PronounsList: EnumEntity(speechRecPhrases = true) {
+    override fun getEnum(lang: Language): List<String> {
+        return listOf(
+            "he",
+            "she",
+            "we",
+            "they",
+            "me",
+            "him",
+            "his",
+            "her",
+            "this",
+            "us",
+            "them",
+            "their",
+            "myself",
+            "yourself",
+            "himself",
+            "herself",
+            "ourselves",
+            "yourselves",
+            "themselves"
+        )
+    }
+}
+
+class Find: EnumEntity(speechRecPhrases = true){
+    override fun getEnum(lang: Language): List<String> {
+        return listOf(
+            "Find",
+            "Look",
+            "Discover",
+            "Locate",
+            "Uncover",
+            "Detect",
+            "Identify",
+            "Spot",
+            "Encounter",
+            "Pinpoint",
+            "Come across",
+            "Come upon",
+            "Stumble upon",
+            "Detect",
+            "Ascertain",
+            "Discern",
+            "Ferret out"
+        )
+
+
+    }
+}
 class Rooms: EnumEntity(speechRecPhrases = true) {
 
     override fun getEnum(lang: Language): List<String> {
         return listOf(
-            "find",
-            "look",
-            "looking",
             "Chamber",
             "Space",
             "Area",
@@ -35,7 +87,6 @@ class Rooms: EnumEntity(speechRecPhrases = true) {
 }
 
 class RoomName: EnumEntity(speechRecPhrases = true) {
-
     override fun getEnum(lang: Language): List<String> {
         return listOf(
             "Lovelace Ada Room",
@@ -65,21 +116,10 @@ class RoomName: EnumEntity(speechRecPhrases = true) {
             "Centre for Doctoral Training",
             "NLP Lab"
         )
-
-
     }
 }
 
-class Repeat: EnumEntity(speechRecPhrases = true) {
 
-    override fun getEnum(lang: Language): List<String> {
-        return listOf("repeat", "reiterate", "recap", "once more", "once again", "one more", "go over")
-
-
-    }
-}
-
-//class ModuleNames :ListEntity<Module>()
 class Names : EnumEntity(speechRecPhrases = true) {
 
     override fun getEnum(lang: Language): List<String> {
@@ -182,7 +222,7 @@ class Names : EnumEntity(speechRecPhrases = true) {
 class Mail : EnumEntity(speechRecPhrases = true) {
 
     override fun getEnum(lang: Language): List<String> {
-        return listOf("Email","Electronic Mail","Mail")
+        return listOf("Email","Electronic Mail","Mail","email address")
     }
 
 }
@@ -238,38 +278,3 @@ class Compulsory : EnumEntity(speechRecPhrases = true) {
 
 }
 
-//class Module: EnumEntity(speechRecPhrases = true) {
-//
-//    override fun getEnum(lang: Language): List<String> {
-//        return listOf(
-//            "Object Oriented Programming and Software Design",
-//            "Professional Issues",
-//            "Team Software Project",
-//            "Data Science with Python",
-//            "Text Processing",
-//            "Speech Processing",
-//            "3D Computer Graphics",
-//            "Testing and Verification in Safety-Critical Systems",
-//            "Machine Learning and Adaptive Intelligence",
-//            "Software development for mobile devices",
-//            "Modelling and Simulation of Natural Systems",
-//            "Theory of Distributed Systems",
-//            "Computer Security and Forensics",
-//            "The Intelligent Web",
-//            "Software and Hardware Verification",
-//            "Speech Technology",
-//            "Natural Language Processing",
-//            "Network Performance Analysis",
-//            "Parallel Computing with Graphical Processing Units",
-//            "Software Reengineering",
-//            "Scalable Machine Learning",
-//            "Team Project",
-//            "Fundamental Security Properties and Mechanisms",
-//            "Cyber Threat Hunting and Digital Forensics",
-//            "Development of Secure Software",
-//            "Security of Control and Embedded Systems"
-//
-//        )
-//    }
-//
-//}

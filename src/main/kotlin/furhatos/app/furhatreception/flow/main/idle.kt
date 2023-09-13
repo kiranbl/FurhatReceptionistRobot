@@ -8,14 +8,18 @@ import furhatos.flow.kotlin.state
 
 val Idle= state {
     onEntry {
+        // Setting up Furhat robot LED light color to blue when it enters this state
         furhat.ledStrip.solid(java.awt.Color.BLUE)
         furhat.attendNobody()
     }
     onReentry {
+        // Setting up Furhat robot LED light color to blue when it enters this state
         furhat.ledStrip.solid(java.awt.Color.BLUE)
+        furhat.attendNobody()
     }
     onUserEnter {
         furhat.attend(it)
+        // flow transition to the Greeting state on user enter.
         goto(Greeting)
     }
 

@@ -8,76 +8,78 @@ import furhatos.app.furhatreceptionist.flow.Parent
 import furhatos.app.furhatreceptionist.nlu.StaffInformationIntent
 import furhatos.app.furhatreceptionist.nlu.ModuleInformationIntent
 import furhatos.app.furhatreceptionist.nlu.RoomInformationIntent
-//import furhatos.app.furhatreceptionist.nlu.RoomInformationIntent
 import furhatos.flow.kotlin.*
 import furhatos.gestures.Gestures
+import furhatos.nlu.EnumEntity
 import furhatos.nlu.common.No
 import furhatos.nlu.common.RequestRepeat
 import furhatos.util.Language
+import java.io.File
 import java.util.*
 
+// Variable to store the current related information happening during the conversation
 var currentprogrammename:String? =null
+var currentstaffname: String ? = null
 
+// Variables defined to store the previous information that was asked by the user
 var repeatprofName:String?=null
 var repeatprofemail:String?=null
 var repeatprofRole:String?=null
-
 var repeatprogrammeName: String?=null
 var repeatsemester:String?=null
 var repeatmodules:Boolean=false
 var repeatcompulsory:Boolean=false
-//var repeatmodulename:String?=null
-
 var repeatprofnameRoom :String?=null
-var repeatprofroom: Boolean=false
 var repeatroomname:String?=null
 
+// Variables defined to call state based on the intent
 var moduleIntentFlag:Boolean=false
 var staffIntentFlag:Boolean=false
 var staffRoomIntentFlag:Boolean=false
 
+// Function that defines the definition for MongoDB database connection and retruns the MongoDatabase instance
 fun connectToMongoDB(): MongoDatabase {
     val connectionString = "mongodb+srv://FurhatReceptionRobot:Robot123@furhatrecptionistcluste.np7i1yx.mongodb.net/?retryWrites=true&w=majority"
     val mongoClient: MongoClient = MongoClients.create(connectionString)
     return mongoClient.getDatabase("FurhatReceptionist")
 }
 
-//println(timeofday)
-
-//val greeting = utterance {
-//    random {
-//        +"Hello Nice to meet you"
-//        +"Hey Pleasure to meet you"
-//        +"Good to see you"
-//        +"Good $timeofday !!! Nice to meet you "
-//    }
-//
-//}
-//val askhelp = utterance {
-//    random {
-//        +"Can I help you with anything related to department?"
-//        +"Do you need any assistance?"
-//        +"Is there anything I can help you with related to the department?"
-//        +"Would you like some help?"
-//        +"Do you need help or information about the department?"
-//        +"Is there something I can assist you with?"
-//        +"May I offer you information related to the department?"
-//        +"Are you looking for any specific information related to our department?"
-//        +"Can I provide you with any help or guidance?"
-//        +"Do you require any help or details regarding our department?"
-//        +"Is there anything you would like to know or need help with our department?"
-//        +"Would you like me to assist you with information about our department?"
-//        +"Can I be of any help or give you information on something related to department?"
-//        +"Do you need any support or have questions about our department?"
-//        +"Is there anything in particular you need help with or want to know about in our department?"
-//        +"Is there a specific topic or area you need assistance or information on our department?"
-//        +"Do you have any inquiries or need assistance with anything related to department?"
-//        +"Can I help you find what you're looking for or provide more information on our department?"
-//        +"Are you seeking help or information regarding a specific matter related to the department?"
-//        +"Do you need any help or have any questions about the department?"
-//    }
-//}
-
+var  mail = listOf("Email","Electronic Mail","Mail","email address");
+var role = listOf("Position", "Role", "Title", "Job", "Duty", "Post");
+var roomFind = listOf("Find",
+    "Look",
+    "Discover",
+    "Locate",
+    "Uncover",
+    "Detect",
+    "Identify",
+    "Spot",
+    "Encounter",
+    "Pinpoint",
+    "Come across",
+    "Come upon",
+    "Stumble upon",
+    "Detect",
+    "Ascertain",
+    "Discern",
+    "Ferret out",
+    "Chamber",
+    "Space",
+    "Area",
+    "Quarters",
+    "Cubicle",
+    "room"
+    )
+var module = listOf("semester","module","modules","subject","subjects","course","courses","topics")
+// Function to find matching word from the list of professor names
+fun findMatchingWord(text: String, wordList: List<String>): String? {
+    for (word in wordList) {
+        if (text.contains(word, ignoreCase = true)) {
+            return word
+        }
+    }
+    return null
+}
 fun getStaffName(name: String): String {
     var namelist = listOf(
         "Roger K Moore",
@@ -173,28 +175,32 @@ fun getStaffName(name: String): String {
 
 }
 
-
+// Greeting state which inherits the Parent state
 val Greeting :State = state(Parent) {
 
-
+    // Calling the mongodb connection function
     var database: MongoDatabase = connectToMongoDB();
 
+    // Getting current time and setting the time of day
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     var moreInfoFlag :Boolean = false;
-//println(hour)
     val timeofday = when{
         hour<12 -> "Morning"
         hour in 13..17 -> "Afternoon"
         else -> "Evening"
     }
+    //trigger that triggers when it enters this state for the first time
     onEntry {
+        //dialogLogger.startSession()
+        // Setting up Furhat robot LED light color to white when it enters this state
+        furhat.ledStrip.solid(java.awt.Color.WHITE)
         furhat.gesture(Gestures.Smile)
         furhat.say {
             random {
-                +"Hello Nice to meet you"
-                +"Hey Pleasure to meet you"
-                +"Good to see you"
-                +"Good $timeofday !!! Nice to meet you "
+                +"Hello Nice to meet you. "
+                +"Hey Pleasure to meet you. "
+                +"Good to see you. "
+                +"Good $timeofday !!! Nice to meet you. "
             }
         }
         furhat.ask({
@@ -220,37 +226,56 @@ val Greeting :State = state(Parent) {
                 +"Are you seeking help or information regarding a specific matter related to the department?"
                 +"Do you need any help or have any questions about the department?"
             }
+            +" You can ask me information about a professor, modules in a particular programme for postgraduate taught courses and you can ask me directions to a particular room. "
+            random {
+                +" Feel free to ask me now. "
+                +" What's on your mind? Ask away!"
+                +" Your questions are welcome; I'm ready to respond. "
+                +" Now you can ask me your question ? "
+                +" Go ahead with your query "
+            }
         })
     }
+    //trigger that triggers when it reenters this state
     onReentry {
         if(!moreInfoFlag) {
+            // Setting up Furhat robot LED light color to white when it enters this state
             furhat.ledStrip.solid(java.awt.Color.WHITE)
             furhat.ask({
-                random {
-                    +"Can I help you with anything related to department?"
-                    +"Do you need any assistance?"
-                    +"Is there anything I can help you with related to the department?"
-                    +"Would you like some help?"
-                    +"Do you need help or information about the department?"
-                    +"Is there something I can assist you with?"
-                    +"May I offer you information related to the department?"
-                    +"Are you looking for any specific information related to our department?"
-                    +"Can I provide you with any help or guidance?"
-                    +"Do you require any help or details regarding our department?"
-                    +"Is there anything you would like to know or need help with our department?"
-                    +"Would you like me to assist you with information about our department?"
-                    +"Can I be of any help or give you information on something related to department?"
-                    +"Do you need any support or have questions about our department?"
-                    +"Is there anything in particular you need help with or want to know about in our department?"
-                    +"Is there a specific topic or area you need assistance or information on our department?"
-                    +"Do you have any inquiries or need assistance with anything related to department?"
-                    +"Can I help you find what you're looking for or provide more information on our department?"
-                    +"Are you seeking help or information regarding a specific matter related to the department?"
-                    +"Do you need any help or have any questions about the department?"
+                random{
+                    +" Feel free to ask me now."
+                    +" What's on your mind? Ask away!"
+                    +" Your questions are welcome; I'm ready to respond."
+                    +" Now you can ask me your question ? "
+                    +" Go ahead with your query "
                 }
+                +Gestures.Smile
+//                random {
+//                    +"Can I help you with anything related to department?"
+//                    +"Do you need any assistance?"
+//                    +"Is there anything I can help you with related to the department?"
+//                    +"Would you like some help?"
+//                    +"Do you need help or information about the department?"
+//                    +"Is there something I can assist you with?"
+//                    +"May I offer you information related to the department?"
+//                    +"Are you looking for any specific information related to our department?"
+//                    +"Can I provide you with any help or guidance?"
+//                    +"Do you require any help or details regarding our department?"
+//                    +"Is there anything you would like to know or need help with our department?"
+//                    +"Would you like me to assist you with information about our department?"
+//                    +"Can I be of any help or give you information on something related to department?"
+//                    +"Do you need any support or have questions about our department?"
+//                    +"Is there anything in particular you need help with or want to know about in our department?"
+//                    +"Is there a specific topic or area you need assistance or information on our department?"
+//                    +"Do you have any inquiries or need assistance with anything related to department?"
+//                    +"Can I help you find what you're looking for or provide more information on our department?"
+//                    +"Are you seeking help or information regarding a specific matter related to the department?"
+//                    +"Do you need any help or have any questions about the department?"
+//                }
             })
         }
         else{
+            // Setting up Furhat robot LED light color to white when it enters this state
             furhat.ledStrip.solid(java.awt.Color.WHITE)
             furhat.ask({
                 random {
@@ -269,10 +294,7 @@ val Greeting :State = state(Parent) {
     }
 
 
-//    onUserEnter {
-//        furhat.say { random { greeting } }
-//        furhat.ask{ random{askhelp} }
-//    }
+    // trigger on request repeat intent
     onResponse<RequestRepeat> {
         furhat.say{
             + Gestures.Smile
@@ -294,6 +316,7 @@ val Greeting :State = state(Parent) {
                 +"Certainly, I'll be glad to reiterate the information,"
             }
         }
+        // Calling a state based on the previous intent that was asked by the user again to repeat
         if(staffIntentFlag){
             call(StaffInformation(database, repeatprofName!!, repeatprofemail, repeatprofRole,true))
         }
@@ -308,57 +331,134 @@ val Greeting :State = state(Parent) {
 
 
     }
+
+    // trigger on staff information intent
     onResponse<StaffInformationIntent>{
-        //furhat.gesture(Gestures.Oh());
 
         staffIntentFlag = true;
         moduleIntentFlag = false;
         staffRoomIntentFlag = false;
-        println("Identified Staff name "+it.intent.getString("staffname"));
-        var staffname:String = getStaffName(it.intent.getString("staffname"))
-        println("Found Staff name "+staffname);
+        var staffname:String?;
 
-        if(it.intent.getString("staffname")!=null && it.intent.getString("staffemail")!=null){
-            repeatprofName = staffname
-            repeatprofemail = it.intent.getString("staffemail")
-            repeatprofRole=null
-            val confirmation = furhat.askYN( "Is it about professor $staffname"+ it.intent.getString("staffemail") +" ?");
-            if(confirmation){
-                println("Reached with name and email here")
-                call(StaffInformation(database,staffname,it.intent.getString("staffemail")));
-                println("Reached again here after info")
-                moreInfoFlag = true;
-                reentry();
-            }else{
-                furhat.ask({ random{
-                    +"Could you please repeat your last query?"
-                }});
+        // Checking if user query has the staff name mentioned
+        if(currentstaffname == null && it.intent.getString("staffname") == null){
+            furhat.ask{random{
+                +"Can you repeat the last query with the staff name ???"
+                +"Could you please repeat the last query with the staff name ???"
+                +"Could you please repeat the last query with the staff name that you are asking for ???"
+            }
             }
         }
-        else if(it.intent.getString("staffname")!=null && it.intent.getString("staffrole")!=null) {
-            repeatprofName = staffname
-            repeatprofRole = it.intent.getString("staffrole")
-            repeatprofemail=null
-            val confirmation = furhat.askYN("Is it about professor $staffname's "+it.intent.getString("staffrole") +"in the department ??");
-            if(confirmation){
-                println("Reached with name and role here")
-                call(StaffInformation(database,staffname,null,it.intent.getString("staffrole")));
-                println("Reached again here after info")
-                moreInfoFlag = true;
-                reentry();
-            }else{
-                furhat.ask({ random{
-                    +"Could you please repeat the last query?"
-                }});
+
+        // Condition to check if there is multiple entities returned and relevant data is retrieved
+        if(it.intent.getString("staffname")!=null){
+            val delimiter = " and "
+            var markSubstring:String?;
+            if(it.intent.getString("staffname").contains(" and ")){
+                markSubstring = it.intent.getString("staffname").substringBefore(delimiter)
+                staffname = getStaffName(markSubstring)
+                currentstaffname = staffname;
+            }
+            else {
+                staffname = getStaffName(it.intent.getString("staffname"))
+                currentstaffname = staffname;
             }
         }
         else{
+            staffname = currentstaffname;
+        }
+
+        // Conditions based on the entites returned from the intents is checked and relevant state is called with these entity parameters.
+        if((it.intent.getString("staffname")!=null && it.intent.getString("staffemail")!=null) || it.intent.getString("staffemail")!=null  ) {
+
+            repeatprofemail = it.intent.getString("staffemail")
+            repeatprofRole = null
+
+            if (it.intent.getString("staffname") == null) {
+                repeatprofName = currentstaffname;
+                val confirmation =
+                    furhat.askYN("Is it about professor $currentstaffname " + it.intent.getString("staffemail") + " ?");
+                if (confirmation) {
+                    println("Reached with name and email here")
+                    call(StaffInformation(database, currentstaffname!!, it.intent.getString("staffemail")));
+                    println("Reached again here after info")
+                    moreInfoFlag = true;
+                    reentry();
+                } else {
+                    furhat.ask({
+                        random {
+                            +"Could you please repeat your last query?"
+                        }
+                    });
+                }
+
+            } else {
+                repeatprofName = staffname
+                val confirmation =
+                    furhat.askYN("Is it about professor $staffname " + it.intent.getString("staffemail") + " ?");
+                if (confirmation) {
+                    println("Reached with name and email here")
+                    call(StaffInformation(database, staffname!!, it.intent.getString("staffemail")));
+                    println("Reached again here after info")
+                    moreInfoFlag = true;
+                    reentry();
+                } else {
+                    furhat.ask({
+                        random {
+                            +"Could you please repeat your last query?"
+                        }
+                    });
+                }
+            }
+        }
+        else if((it.intent.getString("staffname")!=null && it.intent.getString("staffrole")!=null) || it.intent.getString("staffrole")!=null ) {
+
+            repeatprofRole = it.intent.getString("staffrole")
+            repeatprofemail=null
+            if (it.intent.getString("staffname") == null) {
+                repeatprofName = currentstaffname;
+                val confirmation =
+                    furhat.askYN("Is it about professor $currentstaffname's " + it.intent.getString("staffrole") + " in the department ??");
+                if (confirmation) {
+                    println("Reached with name and role here")
+                    call(StaffInformation(database, currentstaffname!!, null, it.intent.getString("staffrole")));
+                    println("Reached again here after info")
+                    moreInfoFlag = true;
+                    reentry();
+                } else {
+                    furhat.ask({
+                        random {
+                            +"Could you please repeat the last query?"
+                        }
+                    });
+                }
+            }
+            else{
+                repeatprofName = staffname;
+                val confirmation =
+                    furhat.askYN("Is it about professor $staffname's " + it.intent.getString("staffrole") + " in the department ??");
+                if (confirmation) {
+                    println("Reached with name and role here")
+                    call(StaffInformation(database, staffname!!, null, it.intent.getString("staffrole")));
+                    println("Reached again here after info")
+                    moreInfoFlag = true;
+                    reentry();
+                } else {
+                    furhat.ask({
+                        random {
+                            +"Could you please repeat the last query?"
+                        }
+                    });
+                }
+            }
+        }
+        else if(it.intent.getString("staffname")!=null || it.intent.getString("pronoun")!=null){
             repeatprofName = staffname
             repeatprofRole = null
             repeatprofemail=null
             val confirmation = furhat.askYN("Is it about professor $staffname ");
             if(confirmation){
-                call(StaffInformation(database,staffname));
+                call(StaffInformation(database, staffname!!));
                 println("Reached again here after info")
                 moreInfoFlag = true;
                 reentry();
@@ -369,67 +469,76 @@ val Greeting :State = state(Parent) {
             }
         }
         }
-
+    // trigger on module information intent
     onResponse<ModuleInformationIntent>{
-        //furhat.gesture(Gestures.Oh());
 
         staffIntentFlag = false;
         moduleIntentFlag = true;
         staffRoomIntentFlag = false;
 
+        // Checking if user query has the programme name mentioned
         if(currentprogrammename == null && it.intent.getString("programmename") == null){
             furhat.ask{random{
                 +"Can you repeat the last query with the programme name ???"
                 +"Could you please repeat the last query with the programme name ???"
                 +"Could you please repeat the last query with the course name that you are asking for ???"
             }
+                +"The programme names could be Advanced Computer Science, or, Data Analytics, or, Computer Science With Speech And Language Processing, or, Cybersecurity and Artificial Intelligence"
             }
         }
 
         if(it.intent.getString("programmename")!=null){
             currentprogrammename = it.intent.getString("programmename");
         }
+        // Checking if user query has the programme name mentioned
+        if(it.intent.getString("modules")!=null && it.intent.getString("programmename")==null && currentprogrammename==null ) {
+            furhat.ask {
+                random {
+                    +"Can you repeat the last query with the programme name ???"
+                    +"Could you please repeat the last query with the programme name ???"
+                    +"Could you please repeat the last query with the course name that you are asking for ???"
+                }
+            }
+        }
+        // Conditions based on the entites returned from the intents is checked and relevant state is called with these entity parameters.
+         if((it.intent.getString("programmename")!=null && it.intent.getString("modules")!=null && it.intent.getString("semester")==null && it.intent.getString("compulsory")==null) ||
+             (currentprogrammename!=null && it.intent.getString("modules")!=null && it.intent.getString("semester")==null && it.intent.getString("compulsory")==null))
+        {
 
-        println("Current programme name is "+ currentprogrammename)
-        println(it.intent.getString("programmename"));
-//        if(it.intent.getString("modulename")!=null && it.intent.getString("modules")!=null){
-//            val confirmation = furhat.askYN("Is it about module number for "+it.intent.getString("modulename")+ " ?");
-//            if(confirmation){
-//                println("Reached with programme name here")
-//                if(it.intent.getString("programmename")!=null){
-//                    call(ModuleInformation(database,it.intent.getString("programmename"),null,false,false,it.intent.getString("modulename")));
-//
-//                }
-//                else{
-//                    call(ModuleInformation(database, currentprogrammename,null,false,false,it.intent.getString("modulename")));
-//
-//                }
-//                println("Reached again here after info")
-//                moreInfoFlag = true;
-//                reentry();
-//            }else{
-//                furhat.ask({ random{
-//                    +"Could you please repeat your last query?"
-//                }});
-//            }
-//        }  else
-       if(it.intent.getString("programmename")!=null && it.intent.getString("modules")!=null && it.intent.getString("semester")==null && it.intent.getString("compulsory")==null){
-            repeatprogrammeName = it.intent.getString("programmename")
            repeatmodules = false
            repeatsemester =  null
            repeatcompulsory = false
-           val confirmation = furhat.askYN(it.intent.toString());
-            if(confirmation){
-                println("Reached with programme name here")
-                call(ModuleInformation(database,it.intent.getString("programmename")));
-                println("Reached again here after info")
-                moreInfoFlag = true;
-                reentry();
-            }else{
-                furhat.ask({ random{
-                    +"Could you please repeat your last query?"
-                }});
+            if(it.intent.getString("programmename")==null){
+                repeatprogrammeName = currentprogrammename
+                val confirmation = furhat.askYN("Is it about modules in $currentprogrammename programme ?");
+                if(confirmation){
+                    println("Reached with programme name here")
+                    call(ModuleInformation(database,it.intent.getString("programmename")));
+                    println("Reached again here after info")
+                    moreInfoFlag = true;
+                    reentry();
+                }else{
+                    furhat.ask({ random{
+                        +"Could you please repeat your last query?"
+                    }});
+                }
             }
+            else{
+                repeatprogrammeName = it.intent.getString("programmename")
+                val confirmation = furhat.askYN(it.intent.toString());
+                if(confirmation){
+                    println("Reached with programme name here")
+                    call(ModuleInformation(database,it.intent.getString("programmename")));
+                    println("Reached again here after info")
+                    moreInfoFlag = true;
+                    reentry();
+                }else{
+                    furhat.ask({ random{
+                        +"Could you please repeat your last query?"
+                    }});
+                }
+            }
+
         }
         else if((it.intent.getString("modules")!=null && it.intent.getString("semester")!=null && it.intent.getString("programmename")==null ) ||
             it.intent.getString("modules")!=null && it.intent.getString("semester")!=null && it.intent.getString("programmename")!=null )
@@ -515,19 +624,39 @@ val Greeting :State = state(Parent) {
 
     }
 
-
+    // trigger on room information intent
     onResponse<RoomInformationIntent>{
-        //furhat.gesture(Gestures.Oh());
-
         staffIntentFlag = false;
         moduleIntentFlag = false;
         staffRoomIntentFlag = true;
-        var staffname: String? =null;
+        var staffname: String?;
         if(it.intent.getString("staffname")!=null){
-            staffname = getStaffName( it.intent.getString("staffname"));
+            staffname = getStaffName(it.intent.getString("staffname"))
+            currentstaffname = staffname;
         }
-
-        if(it.intent.getString("staffname")!=null && it.intent.getString("room")!=null) {
+        else{
+            staffname = currentstaffname;
+        }
+        // Conditions based on the entites returned from the intents is checked and relevant state is called with these entity parameters.
+        if((it.intent.getString("staffname")==null && it.intent.getString("room")!=null && it.intent.getString("roomname")==null)||(it.intent.getString("staffname")==null && it.intent.getString("find")!=null && it.intent.getString("roomname")==null)  ) {
+            repeatprofnameRoom = currentstaffname;
+            repeatroomname = null
+            val confirmation = furhat.askYN("Do you want to know the directions for professor $currentstaffname room ?");
+            if (confirmation) {
+                println("Reached with staff and room here")
+                call(RoomInformation(database, currentstaffname));
+                println("Reached again here after info")
+                moreInfoFlag = true;
+                reentry();
+            } else {
+                furhat.ask({
+                    random {
+                        +"Could you please repeat your last query?"
+                    }
+                });
+            }
+        }
+        else if((it.intent.getString("staffname")!=null && it.intent.getString("room")!=null)||(it.intent.getString("staffname")!=null && it.intent.getString("find")!=null)  ) {
             repeatprofnameRoom = staffname;
             repeatroomname = null
             val confirmation = furhat.askYN("Do you want to know the directions for professor $staffname room ?");
@@ -567,7 +696,7 @@ val Greeting :State = state(Parent) {
     }
 
 
-
+    // trigger on No intent
     onResponse<No> {
         furhat.say {
             random{
@@ -590,23 +719,81 @@ val Greeting :State = state(Parent) {
 
         //terminate()
     }
-//
-//    onUserLeave {
-//        goto(Idle)
-//    }
+
+    // trigger on responses outside the intents defined
     onResponse {
-        furhat.say{
-            +Gestures.Smile
-            +"Sorry, I didn't understand that. "
-            random {
-                +"You can ask me information related to our department. You can ask information about a professor, about the professor role and even their email address."
-                +"You can ask me information related to our department. You can ask information about modules in a particular programme, about compulsory modules in a programme and what are the modules that happen in a particular semester."
-                +"You can ask me information related to our department. You can ask directions to professor's room , or , for a particular room. "
+        furhat.say("Sorry!!! I didn't understand that. ")
+
+        // Checking for similar words in the user utterances to check what information is being asked
+        // And based on that the user is guided on what to ask the Furhat
+        val matchingStaffRoleWord = findMatchingWord(it.text, role)
+        val matchingStaffMailWord = findMatchingWord(it.text, mail)
+        val matchingRoomFindWord = findMatchingWord(it.text, roomFind)
+        val matchingModuleWord = findMatchingWord(it.text, module)
+        println("Unknown response "+ it.text)
+
+        if (matchingStaffRoleWord != null) {
+            furhat.say{
+                +Gestures.Smile
+                +"Are you asking about a role of a academic staff in the department ??"
+                +" If that's the case then you need to make sure you ask about the particular information with the academic staff name. "
+                +"You can say something like this. "
+                +"What is professor Guy Brown role within the department"
+                +"or, "
+                +" Give me Guy Brown role. "
+            }
+        } else if(matchingStaffMailWord!=null) {
+            furhat.say{
+                +Gestures.Smile
+                +"Are you asking me about a email address of a academic staff in the department ??"
+                +" If that's the case then you need to make sure you ask about the particular information with the academic staff name. "
+                +"You can say something like this. "
+                +"I wanted the Guy Brown's email id "
+                +"or, "
+                +" Could you please provide me with Guy Brown's email address? "
+            }
+        }
+        else if(matchingRoomFindWord!=null){
+            furhat.say{
+                +Gestures.Smile
+                +"Are you asking me for directions to a academic staff room, or, a lab room in the department ??"
+                +" If that's the case then you need to make sure you ask about the particular information with the academic staff name or the lab or room name. "
+                +"You can ask me something like this. "
+                +"Where can I find NLP Lab ,"
+                +"or, "
+                +"I am looking for the meeting room ,"
+                +"or, "
+                + "Where can I find  professor Guy Browns room in the department ,"
+                +"or, "
+                +"Can you give me directions to Guy Brown's room ??"
+            }
+        }
+        else if(matchingModuleWord!=null){
+            furhat.say{
+                +Gestures.Smile
+                +" Are you asking me about modules information in the department ??"
+                +" If that's the case then you need to make sure you ask about the particular information with the programme name for the postgraduate taught course. "
+                +"You can ask me something like this. "
+                +" What are the different modules available in the Data Analytics programme? "
+                +"or, "
+                +" What are the modules offered for AUTUMN semester? "
+                +"or, "
+                +" What are the compulsory modules in Advanced Computer Science programme ? "
+            }
+        }
+        else{
+            furhat.say {
+                +Gestures.Smile
+                +" You can ask me information about a professor, his email and his role in the department."
+                +" You can ask me about modules in a particular programme for postgraduate taught courses, the compulsory modules in it and about modules taught in a particular semester."
+                +" And finally you can ask me directions to a particular staff room"
 
             }
         }
-        reentry();
+
+        reentry()
     }
+
     onResponseFailed {
         furhat.say {
             +Gestures.Nod()
@@ -629,5 +816,6 @@ val Greeting :State = state(Parent) {
         //goto(Idle())
         //terminate()
     }
+
 }
 

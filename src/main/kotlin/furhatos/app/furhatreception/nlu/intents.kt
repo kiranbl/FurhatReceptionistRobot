@@ -1,11 +1,13 @@
 package furhatos.app.furhatreceptionist.nlu
 import CompulsorySynonyms
+import FindSynonyms
 import MailEntity
 //import ModuleNames
 import ModuleSynonyms
 import ProfessorNames
 import ProgrammeNames
-import RepeatEntity
+import Pronouns
+//import RepeatEntity
 import RoleEntity
 import RoomNames
 import RoomSynonyms
@@ -14,16 +16,46 @@ import furhatos.nlu.Intent
 import furhatos.nlu.TextGenerator
 import furhatos.util.*
 
+// Class definition of Intents for the Staff related user utterances
 class StaffInformationIntent(
     val staffname : ProfessorNames? = null,
     val staffemail : MailEntity? = null,
-    val staffrole : RoleEntity? = null
+    val staffrole : RoleEntity? = null,
+    val pronoun : Pronouns?=null
 ) : Intent() {
     override fun getExamples(lang: Language): List<String> {
         return listOf(
+            "Can you tell me about @pronoun in the computer science department",
+            "Can you tell me about @pronoun",
+            "I wanted information about @pronoun",
+            "Can you give me @pronoun information",
+            "can you give me information on @pronoun",
+            "Give me some information on @pronoun",
+            "Give me information on @pronoun",
+            "Talk about @pronoun",
+            "Say something about @pronoun",
+            "@pronoun information",
+            "Could you provide some information about @pronoun?",
+            "I'm interested in learning about @pronoun . Can you help?",
+            "Could you provide me with details about @pronoun in the our department?",
+            "Could you provide me with details about the @pronoun in the computer science department?",
+            "I'm looking for information on the @pronoun in the computer science department.",
+            "Can you tell me more about @pronoun who teach in the computer science department?",
+            "I'd like to learn about @pronoun who are part of the computer science department.",
+            "Do you have any information about @pronoun ?",
+            "I'd appreciate it if you could share some information about @pronoun .",
+
+
             "Can you tell me about Professor @staffname in the computer science department",
             "Can you tell me about Professor @staffname",
             "I wanted information about @staffname",
+            "Give me some information on @staffname",
+            "Give me information on @staffname",
+            "Give me some information on professor @staffname",
+            "Give me information on professor @staffname",
+            "Talk about professor @staffname",
+            "Talk about @staffname",
+            "Say something about @staffname",
             "@staffname information",
             "Could you provide some information about @staffname?",
             "I'm interested in learning about @staffname who works in the Computer Science department. Can you help?",
@@ -33,11 +65,27 @@ class StaffInformationIntent(
             "Can you tell me more about professor @staffname who teach in the computer science department?",
             "I'd like to learn about the professor @staffname who are part of the computer science department.",
             "Do you have any information about the @staffname ?",
-            "I'd appreciate it if you could share some information about @staffname department.",
+            "I'd appreciate it if you could share some information about @staffname.",
+
+            //Staff email
+            "Could you please provide @pronoun @staffemail?",
+            "I'll need @pronoun @staffemail for further communication.",
+            "Can you share @pronoun @staffemail email address?",
+            "To stay in touch, may I have @pronoun @staffemail?",
+            "Can I get @pronoun @staffemail?",
+            "Is there an @staffemail I can reach @pronoun at?",
+            "I wanted  @pronoun @staffemail",
+            "Can you give me @pronoun @staffemail",
+            "What's @pronoun @staffemail",
+            "What is @pronoun @staffemail?",
+            "Give me @pronoun @staffemail",
+            "I wanted @pronoun @staffemail",
 
             //Staff name and email
+            "what's the @staffemail of @staffname",
             "what is the @staffemail for Professor @staffname",
             "I wanted the @staffname's @staffemail id",
+            "I wanted the @staffemail of professor @staffname",
             "Could you please give me the @staffemail of @staffname?",
             "Would you mind sharing professor @staffname @staffemail ID with me, please?",
             "Could you please provide me with @staffname @staffemail address?",
@@ -60,48 +108,189 @@ class StaffInformationIntent(
             "I'd appreciate it if you could give me the @staffemail of professor @staffname.",
             "What is the professor @staffname's preferred @staffemail for communication?",
 
+
+
+            "What is @pronoun @staffrole within the department?",
+            "Could you please outline @pronoun @staffrole within the department?",
+            "What is @pronoun academic @staffrole within the department?",
+            "What is @pronoun @staffrole in the department?",
+            "What's @pronoun @staffrole ? ",
+            "What is @pronoun @staffrole?",
+            "Give me @pronoun @staffrole",
+            "What is the @staffrole of @pronoun within the department?",
+            "Could you describe the @staffrole of @pronoun in this department?",
+            "What are the @staffrole associated with @pronoun in the department?",
+            "I'm curious about the @staffrole of @pronoun within this department.",
+            "What does @pronoun @staffrole entail within this department?",
+            "I'm interested in learning about the @staffrole of @pronoun in this setting.",
+            "I'd like to understand the @staffrole that @pronoun play within this department.",
+            "What can you tell me about the @staffrole of @pronoun in this department?",
+
             //Staff name and role
             "What is professor @staffname @staffrole within the department?",
             "Could you please outline professor @staffname @staffrole within the department?",
             "What is professor @staffname academic @staffrole within the department?",
             "What is @staffname @staffrole in the department?",
             "What is @staffname @staffrole?",
+            "What is professor @staffname @staffrole?",
             "Give me @staffname @staffrole",
             "What is the @staffrole of professor @staffname within the department?",
             "Could you describe the @staffrole of @staffname in this department?",
-            "What are the duties associated with a professor @staffname @staffname in the department?",
+            "What are the @staffrole associated with a professor @staffname in the department?",
             "I'm curious about the @staffrole of a professor @staffname within this department.",
             "What does a professor @staffname's @staffrole entail within this department?",
             "I'm interested in learning about the @staffrole of a professor @staffname in this setting.",
             "I'd like to understand the @staffrole that professor @staffname play within this department.",
-            "What can you tell me about the @staffrole of professor @staffname in this department?"
+            "What can you tell me about the @staffrole of professor @staffname in this department?",
+
+            "What's your favorite movie?",
+            "Tell me about your family.",
+            "I'd like to learn how to paint.",
+            "Can you recommend a good smartphone?",
+            "What's the recipe for spaghetti carbonara?",
+            "Who won the World Series last year?",
+            "How do I fix a leaky faucet?",
+            "Do you know any good jokes?",
+            "What's the square root of 144?",
+            "Can you suggest a good podcast to listen to?",
+            "Tell me a fun fact.",
+            "I'm interested in astronomy. Where should I start?",
+            "What's the best way to clean a laptop screen?",
+            "Can you recommend a good sci-fi book?",
+            "What's the population of Tokyo?",
+            "How do I tie a tie?",
+            "Can you tell me about famous historical figures?",
+            "What's the difference between weather and climate?",
+            "How do I plant a garden?",
+            "Tell me a bit about ancient civilizations.",
+            "Can you help me choose a gift for my friend?",
+            "What's the highest-grossing movie of all time?",
+            "How do I create a budget?",
+            "Can you suggest a good workout routine?",
+            "Tell me a famous quote.",
+            "I'm interested in fashion. Any tips for dressing well?",
+            "What's the capital of Australia?",
+            "How do I make a delicious omelette?",
+            "Can you recommend a good documentary to watch?",
+            "Tell me about famous landmarks around the world.",
+            "I'd like to learn a new language. Where should I begin?",
+            "What's the longest river in the world?",
+            "How do I change my car's oil?",
+            "Can you suggest a good hiking trail?",
+            "Tell me about different types of cuisines.",
+            "I'm curious about space exploration. Any recent discoveries?",
+            "What's the average lifespan of a house cat?",
+            "How do I train a dog?",
+            "Can you recommend a good board game for family gatherings?",
+            "Tell me about famous inventors and their inventions.",
+            "I'd like to improve my photography skills. Any tips?",
+            "What's the deepest part of the ocean?",
+            "How do I start a blog?",
+            "Can you suggest a good comedy movie?",
+            "Tell me about the Seven Wonders of the Ancient World.",
+            "I'm interested in art history. Any notable artists to learn about?",
+            "What's the highest mountain on Earth?",
+            "How do I write a resume?",
+            "Can you recommend a good place to travel for a vacation?",
+            "Tell me about different types of musical genres.",
+            "What's your favorite type of cuisine?",
+            "Tell me a bit about your educational background.",
+            "I'd like to learn more about history. Any specific era you recommend?",
+            "How do I improve my time management skills?",
+            "Can you recommend a good book for personal development?",
+            "What's the process for making homemade ice cream?",
+            "Do you have any tips for improving focus and concentration?",
+            "Can you explain the concept of quantum physics?",
+            "Tell me about the process of photosynthesis.",
+            "I'm interested in learning about different cultures. Any suggestions?",
+            "What's the best way to brew a perfect cup of coffee?",
+            "How do I clean and organize my closet effectively?",
+            "Can you suggest some fun outdoor activities for the weekend?",
+            "Tell me about the history of famous landmarks in New York City.",
+            "I'd like to improve my public speaking skills. Any advice?",
+            "How do I start a small business?",
+            "Can you recommend a good documentary on wildlife?",
+            "What's your favorite type of music?",
+            "Tell me about famous scientists and their contributions.",
+            "I'm interested in learning about different religions. Any recommendations?",
+            "What's the process for brewing homemade beer?",
+            "How do I plan a budget-friendly vacation?",
+            "Can you suggest some effective study techniques?",
+            "Tell me about the history of ancient civilizations in South America.",
+            "I'd like to improve my culinary skills. Any cooking classes you suggest?",
+            "What's the best way to care for indoor plants?",
+            "How do I create a compelling social media strategy?",
+            "Can you recommend a good documentary on space exploration?",
+            "Tell me about the history of famous art movements.",
+            "I'm interested in learning about sustainable living practices. Any resources?",
+            "What's your favorite type of exercise?",
+            "Tell me about the history of famous literature.",
+            "I'd like to improve my knowledge of world geography. Where should I start?",
+            "How do I build a website from scratch?",
+            "Can you suggest some healthy eating habits?",
+            "What's your favorite type of animal?",
+            "Tell me about the history of famous inventions.",
+            "I'm interested in learning about psychology. Any recommended books?",
+            "What's the process for brewing a perfect cup of tea?",
+            "How do I create a stunning garden design?",
+            "Can you recommend a good documentary on environmental conservation?",
+            "Tell me about the history of famous political leaders.",
+            "I'd like to improve my woodworking skills. Any beginner projects?",
+            "What's the best way to maintain a healthy work-life balance?",
+            "How do I develop effective problem-solving skills?",
+            "Can you suggest some mindfulness and meditation techniques?",
+            "Tell me about the history of famous athletes and sports events.",
+            "I'm interested in learning about cryptocurrency. Any beginner guides?",
+            "What's your favorite type of outdoor activity?",
+            "Tell me about the history of famous explorers and their expeditions."
 
             )
     }
-//    override fun toText(lang : Language) : String {
-//        println("sTAFF NAME == "+staffname)
-//        return generate(
-//            "Is it about professor $staffname $staffemail ? | Is it about professor $staffname $staffrole in the department ?? | Is it about professor $staffname ");
-//    }
-//
-//    override fun toString(): String {
-//        return toText()
-//    }
 }
-
+// Class definition of Intents for the room related user utterances
 class RoomInformationIntent (
     val staffname : ProfessorNames? = null,
     val room: RoomSynonyms?=null,
-    val roomname: RoomNames?=null
+    val find:FindSynonyms?=null,
+    val roomname: RoomNames?=null,
+    val pronoun: Pronouns?=null
 ):Intent() {
     override fun getExamples(lang: Language): List<String> {
         return listOf(
 
+            "Where can I @find @pronoun ?",
+            "I'm @find for @pronoun",
+            "Hello, I'm looking for @pronoun @room" ,
+            "Where can I find @pronoun @room ?",
+            "Where can I find  @pronoun @room in the department ?",
+            "Can you give me directions to @pronoun @room ??",
+            "could you please help me find @pronoun @room?" ,
+            "Excuse me, could you please help me find @pronoun @room?" ,
+            "Excuse me, could you please help me find @pronoun @room? I need to discuss something related to my studies.",
+            "Good morning, I'm looking for @pronoun @room. Would you be able to direct me to it?",
+            "Would you be able to direct me to @pronoun @room?",
+            "Hello, I have an appointment with @pronoun, and I'm not sure where the @room is Could you assist me in locating it?",
+            "Hi there, I need to see @pronoun, but I'm not sure where the @room is. Would you mind pointing me in the right direction?",
+            "Good day, I'm trying to find @pronoun @room. Could you guide me to it, please?",
+            "Excuse me, could you please help me with directions to @pronoun @room in the computer science department?",
+            "Hello, I'm looking for @pronoun @room Could you guide me there?",
+            "Good morning, I need to find @pronoun @room in the computer science department. Can you point me in the right direction?",
+            "Hi there, I'm trying to locate @pronoun @room in the computer science department. Would you be able to assist me?",
+            "Hello, I have an appointment with @pronoun , but I'm not sure where their @room is. Could you give me directions?",
+            "Excuse me, I need to visit @pronoun and I'm a bit lost. Could you provide me with directions to their @room?",
+            "Hi, I'm a student looking for @pronoun @room in the computer science department. Could you tell me how to get there?",
+            "Good day, I'm trying to locate @pronoun @room in the computer science department. Can you please show me the way?",
+            "Hello there, I need to meet with @pronoun in the computer science department, but I'm not familiar with the @room. Could you direct me?",
+            "Hi, sorry to bother you, but I'm looking for @pronoun @room in the department. Could you provide me with directions?",
+
+
+
             //Getting direction for professor room
-            "Where can I @room @staffname ?",
-            "Where can I  @room professor @staffname ?",
-            "I'm  @room for Professor @staffname" ,
-            "Hello, I'm  @room for Professor @staffname" ,
+            "Where can I @find @staffname ?",
+            "Where can I  @find professor @staffname ?",
+            "I'm @find for @staffname" ,
+            "I'm  @find for Professor @staffname" ,
+            "Hello, I'm  @find for Professor @staffname" ,
             "Hello, I'm looking for Professor @staffname's @room" ,
             "Where can I find @staffname @room ?",
             "Where can I find  @staffname @room in the department ?",
@@ -112,11 +301,11 @@ class RoomInformationIntent (
             "Excuse me, could you please help me find Professor @staffname's @room? I need to discuss something related to my studies.",
             "Good morning, I'm looking for Professor @staffname's @room. Would you be able to direct me to it?",
             "Would you be able to direct me to @staffname's @room?",
-            "Hello, I have an appointment with Professor  @staffname, and I'm not sure where their @room is. Could you assist me in locating it?",
+            "Hello, I have an appointment with Professor  @staffname, and I'm not sure where their @room is Could you assist me in locating it?",
             "Hi there, I need to see Professor @staffname, but I'm not sure where their @room is. Would you mind pointing me in the right direction?",
             "Good day, I'm trying to find Professor @staffname's @room. Could you guide me to it, please?",
             "Excuse me, could you please help me with directions to Professor @staffname's @room in the computer science department?",
-            "Hello, I'm looking for Professor @staffname's @room . Could you guide me there?",
+            "Hello, I'm looking for Professor @staffname's @room Could you guide me there?",
             "Good morning, I need to find Professor @staffname's @room in the computer science department. Can you point me in the right direction?",
             "Hi there, I'm trying to locate Professor @staffname's @room in the computer science department. Would you be able to assist me?",
             "Hello, I have an appointment with Professor @staffname , but I'm not sure where their @room is. Could you give me directions?",
@@ -131,6 +320,9 @@ class RoomInformationIntent (
             "Where can I find @roomname",
             "I am looking for the @roomname room",
             "I am looking for the @roomname",
+            "I was looking for @roomname",
+            "Can you give directions for the @roomname",
+            "Can you give directions for the @roomname room",
             "Excuse me, could you please tell me how to get to the @roomname?",
             "Can you guide me to the @roomname?",
             "Hey, do you know where I can find the @roomname?",
@@ -140,52 +332,116 @@ class RoomInformationIntent (
             "Hello, I'm new here. Could you give me directions to the @roomname?",
             "Hey, I'm looking for the @roomname. Any chance you could let me know how to get there?",
             "Excuse me, I'm trying to find the @roomname. Could you give me some directions?",
-            "Hi, I have a class in the @roomname, but I'm not sure where it is. Could you assist me?"
+            "Hi, I have a class in the @roomname, but I'm not sure where it is. Could you assist me?",
+
+
+            // Negatives
+            "What's your favorite movie?",
+            "Tell me about your family.",
+            "I'd like to learn how to paint.",
+            "Can you recommend a good smartphone?",
+            "What's the recipe for spaghetti carbonara?",
+            "Who won the World Series last year?",
+            "How do I fix a leaky faucet?",
+            "Do you know any good jokes?",
+            "What's the square root of 144?",
+            "Can you suggest a good podcast to listen to?",
+            "Tell me a fun fact.",
+            "I'm interested in astronomy. Where should I start?",
+            "What's the best way to clean a laptop screen?",
+            "Can you recommend a good sci-fi book?",
+            "What's the population of Tokyo?",
+            "How do I tie a tie?",
+            "Can you tell me about famous historical figures?",
+            "What's the difference between weather and climate?",
+            "How do I plant a garden?",
+            "Tell me a bit about ancient civilizations.",
+            "Can you help me choose a gift for my friend?",
+            "What's the highest-grossing movie of all time?",
+            "How do I create a budget?",
+            "Can you suggest a good workout routine?",
+            "Tell me a famous quote.",
+            "I'm interested in fashion. Any tips for dressing well?",
+            "What's the capital of Australia?",
+            "How do I make a delicious omelette?",
+            "Can you recommend a good documentary to watch?",
+            "Tell me about famous landmarks around the world.",
+            "I'd like to learn a new language. Where should I begin?",
+            "What's the longest river in the world?",
+            "How do I change my car's oil?",
+            "Can you suggest a good hiking trail?",
+            "Tell me about different types of cuisines.",
+            "I'm curious about space exploration. Any recent discoveries?",
+            "What's the average lifespan of a house cat?",
+            "How do I train a dog?",
+            "Can you recommend a good board game for family gatherings?",
+            "Tell me about famous inventors and their inventions.",
+            "I'd like to improve my photography skills. Any tips?",
+            "What's the deepest part of the ocean?",
+            "How do I start a blog?",
+            "Can you suggest a good comedy movie?",
+            "Tell me about the Seven Wonders of the Ancient World.",
+            "I'm interested in art history. Any notable artists to learn about?",
+            "What's the highest mountain on Earth?",
+            "How do I write a resume?",
+            "Can you recommend a good place to travel for a vacation?",
+            "Tell me about different types of musical genres.",
+            "What's your favorite type of cuisine?",
+            "Tell me a bit about your educational background.",
+            "I'd like to learn more about history. Any specific era you recommend?",
+            "How do I improve my time management skills?",
+            "Can you recommend a good book for personal development?",
+            "What's the process for making homemade ice cream?",
+            "Do you have any tips for improving focus and concentration?",
+            "Can you explain the concept of quantum physics?",
+            "Tell me about the process of photosynthesis.",
+            "I'm interested in learning about different cultures. Any suggestions?",
+            "What's the best way to brew a perfect cup of coffee?",
+            "How do I clean and organize my closet effectively?",
+            "Can you suggest some fun outdoor activities for the weekend?",
+            "Tell me about the history of famous landmarks in New York City.",
+            "I'd like to improve my public speaking skills. Any advice?",
+            "How do I start a small business?",
+            "Can you recommend a good documentary on wildlife?",
+            "What's your favorite type of music?",
+            "Tell me about famous scientists and their contributions.",
+            "I'm interested in learning about different religions. Any recommendations?",
+            "What's the process for brewing homemade beer?",
+            "How do I plan a budget-friendly vacation?",
+            "Can you suggest some effective study techniques?",
+            "Tell me about the history of ancient civilizations in South America.",
+            "I'd like to improve my culinary skills. Any cooking classes you suggest?",
+            "What's the best way to care for indoor plants?",
+            "How do I create a compelling social media strategy?",
+            "Can you recommend a good documentary on space exploration?",
+            "Tell me about the history of famous art movements.",
+            "I'm interested in learning about sustainable living practices. Any resources?",
+            "What's your favorite type of exercise?",
+            "Tell me about the history of famous literature.",
+            "I'd like to improve my knowledge of world geography. Where should I start?",
+            "How do I build a website from scratch?",
+            "Can you suggest some healthy eating habits?",
+            "What's your favorite type of animal?",
+            "Tell me about the history of famous inventions.",
+            "I'm interested in learning about psychology. Any recommended books?",
+            "What's the process for brewing a perfect cup of tea?",
+            "How do I create a stunning garden design?",
+            "Can you recommend a good documentary on environmental conservation?",
+            "Tell me about the history of famous political leaders.",
+            "I'd like to improve my woodworking skills. Any beginner projects?",
+            "What's the best way to maintain a healthy work-life balance?",
+            "How do I develop effective problem-solving skills?",
+            "Can you suggest some mindfulness and meditation techniques?",
+            "Tell me about the history of famous athletes and sports events.",
+            "I'm interested in learning about cryptocurrency. Any beginner guides?",
+            "What's your favorite type of outdoor activity?",
+            "Tell me about the history of famous explorers and their expeditions."
         )
 
     }
-//    override fun toText(lang : Language) : String {
-//        println("Staff Room Name "+staffname)
-//        return generate(
-//            "Do you want to know the directions for professor $staffname room ? | " +
-//                    "Do you want to know the directions for $roomname ?");
-//    }
-//
-//    override fun toString(): String {
-//        return toText()
-//    }
-}
-//class RepeatInformationIntent(
-//    val repeat : RepeatEntity? = null
-//):Intent() {
-//    override fun getExamples(lang: Language): List<String> {
-//        return listOf(
-//            "Can you @repeat the information",
-//            "Please @repeat once again",
-//            "@repeat",
-//            "I'm terribly sorry, but could you please @repeat that information for me?",
-//            "I apologize for any inconvenience, but could you kindly go over that information @repeat?",
-//            "I'm afraid I didn't quite catch all the details. Could you please @repeat the information, if you don't mind?",
-//            "I'm sorry to trouble you, but would it be possible for you to @repeat the information for me?",
-//            "I hope you don't mind me asking, but could you @repeat the information again? I want to make sure I've got it right.",
-//            "I hate to bother you, but could you please @repeat the information one more time? I want to be sure I've understood correctly.",
-//            "I'm sorry for any confusion, but would you be able to @repeat the information so that I can ensure I have all the details?",
-//            "I apologize for needing to ask, but could you please @repeat the information? I want to be certain I have it accurately.",
-//            "Pardon me, could you @repeat the information once again, please?",
-//            "Pardon me for asking, but could you @repeat that information one more time?",
-//            "I beg your pardon, but would you mind @repeat the information for me?",
-//            "I'm sorry to interrupt, but could you pardon me and @repeat the information?",
-//            "Pardon the inconvenience, but could you kindly @repeat the information?",
-//            "Pardon me for needing to ask again, but could you @repeat the information once more?",
-//            "Pardon my request, but could you please @repeat the information?",
-//            "I beg your pardon, but could you provide the information @repeat for clarity?",
-//            "Pardon my interruption, but could you @repeat the information again, if you wouldn't mind?",
-//            "Pardon my curiosity, but could you @repeat the information for me?"
-//        )
-//
-//    }
-//}
 
+}
+// Class definition of Intents for the module related user utterances
 class ModuleInformationIntent(
     val programmename : ProgrammeNames? = null,
     val semester : SemesterNames? = null,
@@ -195,6 +451,19 @@ class ModuleInformationIntent(
 ) : Intent(), TextGenerator {
     override fun getExamples(lang: Language): List<String> {
         return listOf(
+
+            "What are the different @modules available",
+            "Could you provide me with a list of @modules offered in the programme within the computer science department?",
+            "What @modules are taught in the programme offered by the computer science department?",
+            "Can you give me an overview of the @modules covered in the programme within the computer science department?",
+            "What are the @modules in programme",
+            "Could you provide me with a list of @modules offered in the programme within our department?",
+            "What @modules are taught in the programme offered by our department?",
+            "Can you give me an overview of the @modules covered in the programme within our department?",
+            "Give me @modules information",
+            "@modules information",
+            "@modules",
+
             // Get the module list for a particular programme
             "What are the different @modules available in the @programmename programme",
             "Could you provide me with a list of @modules offered in the @programmename programme within the computer science department?",
@@ -240,27 +509,112 @@ class ModuleInformationIntent(
             "Could you provide me with a list of @compulsory @modules offered in the programme ?",
             "Which @compulsory @modules are being taught in the programme",
             "What @compulsory @modules are taught in this programme offered by our department?",
-            "Can you give me an overview of the @compulsory @modules covered in this programme within our department?"
+            "Can you give me an overview of the @compulsory @modules covered in this programme within our department?",
+
+            "What's your favorite movie?",
+            "Tell me about your family.",
+            "I'd like to learn how to paint.",
+            "Can you recommend a good smartphone?",
+            "What's the recipe for spaghetti carbonara?",
+            "Who won the World Series last year?",
+            "How do I fix a leaky faucet?",
+            "Do you know any good jokes?",
+            "What's the square root of 144?",
+            "Can you suggest a good podcast to listen to?",
+            "Tell me a fun fact.",
+            "I'm interested in astronomy. Where should I start?",
+            "What's the best way to clean a laptop screen?",
+            "Can you recommend a good sci-fi book?",
+            "What's the population of Tokyo?",
+            "How do I tie a tie?",
+            "Can you tell me about famous historical figures?",
+            "What's the difference between weather and climate?",
+            "How do I plant a garden?",
+            "Tell me a bit about ancient civilizations.",
+            "Can you help me choose a gift for my friend?",
+            "What's the highest-grossing movie of all time?",
+            "How do I create a budget?",
+            "Can you suggest a good workout routine?",
+            "Tell me a famous quote.",
+            "I'm interested in fashion. Any tips for dressing well?",
+            "What's the capital of Australia?",
+            "How do I make a delicious omelette?",
+            "Can you recommend a good documentary to watch?",
+            "Tell me about famous landmarks around the world.",
+            "I'd like to learn a new language. Where should I begin?",
+            "What's the longest river in the world?",
+            "How do I change my car's oil?",
+            "Can you suggest a good hiking trail?",
+            "Tell me about different types of cuisines.",
+            "I'm curious about space exploration. Any recent discoveries?",
+            "What's the average lifespan of a house cat?",
+            "How do I train a dog?",
+            "Can you recommend a good board game for family gatherings?",
+            "Tell me about famous inventors and their inventions.",
+            "I'd like to improve my photography skills. Any tips?",
+            "What's the deepest part of the ocean?",
+            "How do I start a blog?",
+            "Can you suggest a good comedy movie?",
+            "Tell me about the Seven Wonders of the Ancient World.",
+            "I'm interested in art history. Any notable artists to learn about?",
+            "What's the highest mountain on Earth?",
+            "How do I write a resume?",
+            "Can you recommend a good place to travel for a vacation?",
+            "Tell me about different types of musical genres.",
+            "What's your favorite type of cuisine?",
+            "Tell me a bit about your educational background.",
+            "I'd like to learn more about history. Any specific era you recommend?",
+            "How do I improve my time management skills?",
+            "Can you recommend a good book for personal development?",
+            "What's the process for making homemade ice cream?",
+            "Do you have any tips for improving focus and concentration?",
+            "Can you explain the concept of quantum physics?",
+            "Tell me about the process of photosynthesis.",
+            "I'm interested in learning about different cultures. Any suggestions?",
+            "What's the best way to brew a perfect cup of coffee?",
+            "How do I clean and organize my closet effectively?",
+            "Can you suggest some fun outdoor activities for the weekend?",
+            "Tell me about the history of famous landmarks in New York City.",
+            "I'd like to improve my public speaking skills. Any advice?",
+            "How do I start a small business?",
+            "Can you recommend a good documentary on wildlife?",
+            "What's your favorite type of music?",
+            "Tell me about famous scientists and their contributions.",
+            "I'm interested in learning about different religions. Any recommendations?",
+            "What's the process for brewing homemade beer?",
+            "How do I plan a budget-friendly vacation?",
+            "Can you suggest some effective study techniques?",
+            "Tell me about the history of ancient civilizations in South America.",
+            "I'd like to improve my culinary skills. Any cooking classes you suggest?",
+            "What's the best way to care for indoor plants?",
+            "How do I create a compelling social media strategy?",
+            "Can you recommend a good documentary on space exploration?",
+            "Tell me about the history of famous art movements.",
+            "I'm interested in learning about sustainable living practices. Any resources?",
+            "What's your favorite type of exercise?",
+            "Tell me about the history of famous literature.",
+            "I'd like to improve my knowledge of world geography. Where should I start?",
+            "How do I build a website from scratch?",
+            "Can you suggest some healthy eating habits?",
+            "What's your favorite type of animal?",
+            "Tell me about the history of famous inventions.",
+            "I'm interested in learning about psychology. Any recommended books?",
+            "What's the process for brewing a perfect cup of tea?",
+            "How do I create a stunning garden design?",
+            "Can you recommend a good documentary on environmental conservation?",
+            "Tell me about the history of famous political leaders.",
+            "I'd like to improve my woodworking skills. Any beginner projects?",
+            "What's the best way to maintain a healthy work-life balance?",
+            "How do I develop effective problem-solving skills?",
+            "Can you suggest some mindfulness and meditation techniques?",
+            "Tell me about the history of famous athletes and sports events.",
+            "I'm interested in learning about cryptocurrency. Any beginner guides?",
+            "What's your favorite type of outdoor activity?",
+            "Tell me about the history of famous explorers and their expeditions."
 
 
 
 
-
-
-//            // Getting module number value with module name and programme name
-//
-//            "What is the number for @modulename @modules?",
-//            "Could you tell me the number for @modulename @modules?",
-//            "What's the @modules number of @modulename?",
-//            "What's the number allocation for @modulename?",
-//            "Could you provide @modules number for @modulename?",
-//            "@modulename",
-//
-//            "What is the number for @modulename @modules in the @programmename programme?",
-//            "Could you tell me the number for @modulename @modules in the @programmename programme?",
-//            "What's the @modules number of @modulename in the @programmename programme?",
-//            "What's the number allocation for @modulename in the @programmename programme?",
-//            "Could you provide @modules number for @modulename in the @programmename programme?"
 
 
 
