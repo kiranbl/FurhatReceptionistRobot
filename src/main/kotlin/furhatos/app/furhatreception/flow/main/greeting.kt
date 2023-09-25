@@ -39,7 +39,7 @@ var staffRoomIntentFlag:Boolean=false
 
 // Function that defines the definition for MongoDB database connection and retruns the MongoDatabase instance
 fun connectToMongoDB(): MongoDatabase {
-    val connectionString = "mongodb+srv://FurhatReceptionRobot:Robot123@furhatrecptionistcluste.np7i1yx.mongodb.net/?retryWrites=true&w=majority"
+    val connectionString = "<MongoDbUri_here>"
     val mongoClient: MongoClient = MongoClients.create(connectionString)
     return mongoClient.getDatabase("FurhatReceptionist")
 }
