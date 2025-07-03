@@ -1,6 +1,6 @@
 ## Description
 This is a receptionist skill for the computer science department which has been developed to handle basic functions.
-
+[View Demo Here ]([https://example.com](https://drive.google.com/file/d/1f49iPS_l7nE0bCZCjTgEBqNc7uazBPah/view))
 Developed a conversational receptionist skill for the Furhat social robot using Kotlin and the Furhat SDK.
 Designed a Natural Language Understanding component: defined intents (e.g., ask-staff, ask-course, ask-room) and entities to accurately parse user queries and trigger relevant responses.
 Integrated knowledge sources (e.g., staff profiles, course catalog, building layout) to dynamically fetch and relay accurate information at runtime.
