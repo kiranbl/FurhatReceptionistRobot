@@ -1,11 +1,12 @@
-# Skill
-Furhat Receptionist skill
-Developed a receptionist skill for the Furhat Robot 
-using Kotlin and the Furhat SDK to greet users and provide information on academic staff, courses, and room locations. Defined and 
-integrated a user query system by defining the intents and entities using NLU component in its OS to categories the intent in the query to direct 
-the users and contributed to improving human-robot interaction design. 
 ## Description
 This is a receptionist skill for the computer science department which has been developed to handle basic functions.
+
+Developed a conversational receptionist skill for the Furhat social robot using Kotlin and the Furhat SDK.
+Designed a Natural Language Understanding component: defined intents (e.g., ask-staff, ask-course, ask-room) and entities to accurately parse user queries and trigger relevant responses.
+Integrated knowledge sources (e.g., staff profiles, course catalog, building layout) to dynamically fetch and relay accurate information at runtime.
+Implemented multi-turn dialogues to engage users in natural help flows, including greetings, follow-up questions, clarification prompts, and closure.
+Conducted usability sessions to refine interaction flow, pacing, and phrasing—elevating trust in human-robot communication through iterative design.
+
 ### -> Skill can give the user information about academic staff in the department
 ### -> Skill can give the user information about modules in a particular programme in post graduate taught courses.
 ### -> Skill can give the user directions to a particular room in the department.
